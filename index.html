@@ -4,138 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ИСП-24 | Расписание</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Framer Motion -->
-    <script src="https://unpkg.com/framer-motion@10.12.16/dist/framer-motion.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            light: '#3b82f6',
-                            DEFAULT: '#2563eb',
-                            dark: '#1d4ed8',
-                        },
-                        dark: {
-                            bg: '#0f172a',
-                            card: '#1e293b',
-                            border: '#334155',
-                        },
-                        light: {
-                            bg: '#f8fafc',
-                            card: '#ffffff',
-                            border: '#e2e8f0',
-                        },
-                        numerator: {
-                            light: '#e0f2fe',
-                            dark: '#0c4a6e',
-                        },
-                        denominator: {
-                            light: '#fee2e2',
-                            dark: '#7f1d1d',
-                        },
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { min-height: 100vh; background: #0b1120; color: #e2e8f0; overflow-x: hidden; }
         
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        /* Loader */
+        #loader { position: fixed; inset: 0; z-index: 100; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
+        #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader-spinner { width: 50px; height: 50px; border: 4px solid rgba(139, 92, 246, 0.2); border-top-color: #8b5cf6; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
+        .loader-text { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: pulse 2s infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* Glassmorphism & UI */
+        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
         
-        .glass-light {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
+        .day-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .day-btn:hover { transform: translateY(-2px); background: rgba(30, 41, 59, 0.8); }
+        .day-btn.active { transform: scale(1.05); box-shadow: 0 0 20px var(--btn-glow); border-color: transparent; background: rgba(30, 41, 59, 0.9); }
         
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
+        .schedule-card { animation: slideUp 0.4s ease forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
         
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
+        .toggle-switch { width: 48px; height: 26px; background: #334155; border-radius: 13px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle-switch.active { background: #8b5cf6; }
+        .toggle-thumb { width: 20px; height: 20px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .toggle-switch.active .toggle-thumb { transform: translateX(22px); }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .badge-constant { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-numerator { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-denominator { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .badge-alternating { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+        .badge-none { background: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b1120; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .gradient-bg-light {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
-        }
-        
-        .gradient-bg-dark {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-        }
-        
-        .loading-dots span {
-            animation: loadingDot 1.4s infinite ease-in-out both;
-        }
-        
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes loadingDot {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
+        .gradient-text { background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     </style>
 </head>
-<body class="transition-colors duration-500">
-    <div id="root"></div>
+<body>
+    <div id="loader"><div class="loader-spinner"></div><div class="loader-text">ИСП-24</div></div>
+    
+    <div class="p-4 md:p-8 max-w-6xl mx-auto opacity-0 transition-opacity duration-700" id="app">
+        <!-- Header -->
+        <header class="glass rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-purple-900/20">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                    <i class="fa-solid fa-graduation-cap text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold gradient-text">ИСП-24</h1>
+                    <p class="text-slate-400 text-sm">Расписание занятий</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-6 justify-center">
+                <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-700/50">
+                    <span class="text-sm font-medium text-slate-300">Числитель</span>
+                    <div class="toggle-switch" id="weekToggle"><div class="toggle-thumb"></div></div>
+                    <span class="text-sm font-medium text-slate-500">Знаменатель</span>
+                </div>
+                <button id="allDaysBtn" class="px-4 py-2 rounded-xl bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 transition border border-slate-700/50 text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-grid-2"></i> Все дни
+                </button>
+            </div>
+        </header>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { motion, AnimatePresence } = window.Motion;
+        <!-- Day Selector -->
+        <nav id="daysNav" class="glass rounded-3xl p-4 mb-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
+            <!-- Buttons injected by JS -->
+        </nav>
 
+        <!-- Schedule -->
+        <main id="scheduleContainer" class="min-h-[300px]"></main>
+    </div>
+
+    <script>
         const scheduleData = {
             monday: [
                 { time: "8:30–10:00", type: "constant", subject: "МДК 01.04", cabinet: "501" },
@@ -174,432 +123,148 @@
         };
 
         const daysConfig = [
-            { id: 'monday', name: 'Понедельник', icon: 'fa-sun', color: 'from-orange-400 to-orange-500' },
-            { id: 'tuesday', name: 'Вторник', icon: 'fa-cloud', color: 'from-blue-400 to-blue-500' },
-            { id: 'wednesday', name: 'Среда', icon: 'fa-cloud-rain', color: 'from-cyan-400 to-cyan-500' },
-            { id: 'thursday', name: 'Четверг', icon: 'fa-wind', color: 'from-emerald-400 to-emerald-500' },
-            { id: 'friday', name: 'Пятница', icon: 'fa-umbrella', color: 'from-indigo-400 to-indigo-500' },
-            { id: 'saturday', name: 'Суббота', icon: 'fa-crown', color: 'from-purple-400 to-purple-500' }
+            { id: 'monday', name: 'Понедельник', icon: 'fa-sun', color: 'from-orange-400 to-orange-500', glow: 'rgba(249, 115, 22, 0.5)' },
+            { id: 'tuesday', name: 'Вторник', icon: 'fa-cloud', color: 'from-blue-400 to-blue-500', glow: 'rgba(59, 130, 246, 0.5)' },
+            { id: 'wednesday', name: 'Среда', icon: 'fa-cloud-rain', color: 'from-cyan-400 to-cyan-500', glow: 'rgba(6, 182, 212, 0.5)' },
+            { id: 'thursday', name: 'Четверг', icon: 'fa-wind', color: 'from-emerald-400 to-emerald-500', glow: 'rgba(16, 185, 129, 0.5)' },
+            { id: 'friday', name: 'Пятница', icon: 'fa-umbrella', color: 'from-indigo-400 to-indigo-500', glow: 'rgba(99, 102, 241, 0.5)' },
+            { id: 'saturday', name: 'Суббота', icon: 'fa-crown', color: 'from-purple-400 to-purple-500', glow: 'rgba(168, 85, 247, 0.5)' }
         ];
 
-        // Loading Screen Component
-        const LoadingScreen = ({ onComplete }) => {
-            useEffect(() => {
-                const timer = setTimeout(onComplete, 2000);
-                return () => clearTimeout(timer);
-            }, [onComplete]);
+        let isNumerator = true;
+        let currentDay = 'monday';
+        let showAllDays = false;
 
-            return (
-                <motion.div
-                    initial={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center gradient-bg-light dark:gradient-bg-dark"
-                >
-                    <div className="text-center">
-                        <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/30"
-                        >
-                            <i className="fas fa-code text-3xl text-white"></i>
-                        </motion.div>
-                        
-                        <motion.h1
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.4 }}
-                            className="text-3xl font-bold text-gray-800 dark:text-white mb-2"
-                        >
-                            ИСП-24
-                        </motion.h1>
-                        
-                        <motion.p
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
-                            className="text-gray-500 dark:text-gray-400 mb-8"
-                        >
-                            Загрузка расписания
-                        </motion.p>
-                        
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: 200 }}
-                            transition={{ duration: 1.5, delay: 0.6 }}
-                            className="h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto loading-dots flex justify-center gap-1"
-                        >
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                        </motion.div>
-                    </div>
-                </motion.div>
-            );
-        };
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('app').classList.remove('opacity-0');
+                document.getElementById('weekToggle').classList.add('active');
+                renderDays();
+                renderSchedule();
+            }, 1500);
+        });
 
-        // Theme Toggle Component
-        const ThemeToggle = ({ isDark, onToggle }) => {
-            return (
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onToggle}
-                    className="relative w-14 h-8 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-                    aria-label="Переключить тему"
-                >
-                    <motion.div
-                        initial={false}
-                        animate={{ x: isDark ? 24 : 2 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className="absolute top-1 w-6 h-6 rounded-full bg-white dark:bg-gray-900 shadow-md flex items-center justify-center"
-                    >
-                        <motion.i
-                            initial={false}
-                            animate={{ rotate: isDark ? 180 : 0 }}
-                            transition={{ duration: 0.3 }}
-                            className={`fas ${isDark ? 'fa-moon text-blue-400' : 'fa-sun text-orange-400'} text-xs`}
-                        ></motion.i>
-                    </motion.div>
-                </motion.button>
-            );
-        };
+        function renderDays() {
+            const nav = document.getElementById('daysNav');
+            nav.innerHTML = daysConfig.map(day => `
+                <button class="day-btn glass rounded-2xl py-3 flex flex-col items-center gap-2 cursor-pointer ${day.id === currentDay ? 'active' : ''}" 
+                        data-day="${day.id}" style="--btn-glow: ${day.glow}">
+                    <i class="fa-solid ${day.icon} text-xl text-slate-400 group-hover:text-white transition-colors"></i>
+                    <span class="text-xs font-semibold text-slate-300">${day.name.slice(0, 2)}</span>
+                </button>
+            `).join('');
 
-        // Week Toggle Component
-        const WeekToggle = ({ weekType, onToggle }) => {
-            return (
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700"
-                >
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => onToggle('numerator')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                            weekType === 'numerator' 
-                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30' 
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                        <i className="fas fa-arrow-up mr-1.5"></i>
-                        Числитель
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => onToggle('denominator')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                            weekType === 'denominator' 
-                            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30' 
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                        <i className="fas fa-arrow-down mr-1.5"></i>
-                        Знаменатель
-                    </motion.button>
-                </motion.div>
-            );
-        };
+            nav.querySelectorAll('.day-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (showAllDays) return;
+                    nav.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentDay = btn.dataset.day;
+                    renderSchedule();
+                });
+            });
+        }
 
-        // Legend Component
-        const Legend = () => {
-            return (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="flex flex-wrap justify-center gap-4 mb-8 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
-                >
-                    <div className="flex items-center gap-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                        <span className="w-3 h-3 rounded bg-gray-200 dark:bg-gray-600 border-2 border-gray-400 dark:border-gray-500"></span>
-                        Постоянно
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-blue-700 dark:text-blue-400">
-                        <span className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-900 border-2 border-blue-400 dark:border-blue-500"></span>
-                        Числитель
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-red-700 dark:text-red-400">
-                        <span className="w-3 h-3 rounded bg-red-100 dark:bg-red-900 border-2 border-red-400 dark:border-red-500"></span>
-                        Знаменатель
-                    </div>
-                </motion.div>
-            );
-        };
+        function getSubject(lesson) {
+            if (lesson.type === 'alternating') return isNumerator ? lesson.subjectNumerator : lesson.subjectDenominator;
+            return lesson.subject;
+        }
 
-        // Lesson Item Component
-        const LessonItem = ({ lesson, weekType, delay, isDark }) => {
-            const getBadgeStyle = () => {
-                if (lesson.type === 'none') {
-                    return isDark 
-                        ? 'bg-gray-800 border-gray-700 text-gray-500' 
-                        : 'bg-gray-100 border-gray-200 text-gray-400';
-                }
-                if (lesson.type === 'alternating') {
-                    if (weekType === 'numerator') {
-                        return isDark 
-                            ? 'bg-blue-900/50 border-blue-700 text-blue-300' 
-                            : 'bg-blue-50 border-blue-300 text-blue-700';
-                    } else {
-                        return isDark 
-                            ? 'bg-red-900/50 border-red-700 text-red-300' 
-                            : 'bg-red-50 border-red-300 text-red-700';
-                    }
-                }
-                if (lesson.type === weekType) {
-                    if (lesson.type === 'numerator') {
-                        return isDark 
-                            ? 'bg-blue-900/50 border-blue-700 text-blue-300' 
-                            : 'bg-blue-50 border-blue-300 text-blue-700';
-                    } else {
-                        return isDark 
-                            ? 'bg-red-900/50 border-red-700 text-red-300' 
-                            : 'bg-red-50 border-red-300 text-red-700';
-                    }
-                }
-                // constant
-                return isDark 
-                    ? 'bg-gray-800 border-gray-600 text-gray-200' 
-                    : 'bg-gray-50 border-gray-300 text-gray-700';
+        function getBadge(type) {
+            const map = {
+                'constant': { cls: 'badge-constant', text: 'Постоянно' },
+                'numerator': { cls: 'badge-numerator', text: 'Числитель' },
+                'denominator': { cls: 'badge-denominator', text: 'Знаменатель' },
+                'alternating': { cls: 'badge-alternating', text: isNumerator ? 'Числитель' : 'Знаменатель' },
+                'none': { cls: 'badge-none', text: 'Окно' }
             };
+            return map[type] || map['constant'];
+        }
 
-            const getSubjectText = () => {
-                if (lesson.type === 'none') return '—';
-                if (lesson.type === 'alternating') {
-                    return weekType === 'numerator' ? lesson.subjectNumerator : lesson.subjectDenominator;
+        function renderSchedule() {
+            const container = document.getElementById('scheduleContainer');
+            container.style.opacity = '0';
+            
+            setTimeout(() => {
+                let html = '';
+                const daysToShow = showAllDays ? daysConfig : daysConfig.filter(d => d.id === currentDay);
+
+                if (showAllDays) {
+                    html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
                 }
-                return lesson.subject;
-            };
 
-            const isVisible = lesson.type !== 'none' && 
-                             (lesson.type === 'constant' || 
-                              lesson.type === weekType || 
-                              lesson.type === 'alternating');
-
-            if (!isVisible) return null;
-
-            return (
-                <motion.div 
-                    initial={{ opacity: 0, x: -15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: delay * 0.08, duration: 0.4, ease: "easeOut" }}
-                    className="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 group"
-                >
-                    <div className={`text-xs font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'} whitespace-nowrap pt-0.5 w-20`}>
-                        {lesson.time}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-semibold px-3 py-1.5 rounded-lg border-l-4 transition-all duration-300 group-hover:shadow-md ${getBadgeStyle()}`}>
-                            {getSubjectText()}
-                        </div>
-                        {lesson.cabinet && lesson.cabinet.trim() !== '' && (
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: delay * 0.08 + 0.15 }}
-                                className={`flex items-center gap-1.5 mt-2 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'} inline-flex px-2.5 py-1 rounded-full border ${isDark ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-white'} shadow-sm`}
-                            >
-                                <i className="fas fa-door-open text-xs"></i>
-                                <span>{lesson.cabinet}</span>
-                            </motion.div>
-                        )}
-                    </div>
-                </motion.div>
-            );
-        };
-
-        // Day Card Component
-        const DayCard = ({ dayConfig, weekType, index, isDark }) => {
-            const lessons = scheduleData[dayConfig.id];
-            const visibleLessons = lessons.filter(l => 
-                l.type !== 'none' && 
-                (l.type === 'constant' || l.type === weekType || l.type === 'alternating')
-            );
-
-            return (
-                <motion.div
-                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ 
-                        delay: index * 0.1 + 0.5, 
-                        duration: 0.5,
-                        type: "spring",
-                        stiffness: 100
-                    }}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-3xl shadow-lg border overflow-hidden transition-all duration-300 hover:shadow-xl`}
-                >
-                    {/* Day Header */}
-                    <div className={`bg-gradient-to-r ${dayConfig.color} p-4 relative overflow-hidden`}>
-                        <div className="absolute inset-0 bg-black/10"></div>
-                        <div className="relative flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <motion.div 
-                                    whileHover={{ rotate: 360 }}
-                                    transition={{ duration: 0.6 }}
-                                    className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white"
-                                >
-                                    <i className={`fas ${dayConfig.icon} text-lg`}></i>
-                                </motion.div>
-                                <div>
-                                    <h3 className="font-bold text-white text-lg">{dayConfig.name}</h3>
-                                    <p className="text-white/80 text-xs">{visibleLessons.length} пар</p>
-                                </div>
-                            </div>
-                            <motion.div
-                                animate={{ rotate: [0, 10, -10, 0] }}
-                                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                                className="text-white/30 text-4xl"
-                            >
-                                <i className={`fas ${dayConfig.icon}`}></i>
-                            </motion.div>
-                        </div>
-                    </div>
+                daysToShow.forEach(day => {
+                    let lessons = scheduleData[day.id] || [];
                     
-                    {/* Lessons */}
-                    <div className="p-4">
-                        {visibleLessons.length > 0 ? (
-                            visibleLessons.map((lesson, lessonIndex) => (
-                                <LessonItem 
-                                    key={`${dayConfig.id}-${lessonIndex}`} 
-                                    lesson={lesson} 
-                                    weekType={weekType} 
-                                    delay={lessonIndex}
-                                    isDark={isDark}
-                                />
-                            ))
-                        ) : (
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className={`text-center py-6 ${isDark ? 'text-gray-500' : 'text-gray-400'} text-sm italic`}
-                            >
-                                <i className="fas fa-coffee text-2xl mb-2 opacity-50"></i>
-                                <p>Нет занятий</p>
-                            </motion.div>
-                        )}
-                    </div>
-                </motion.div>
-            );
-        };
+                    // Фильтрация: скрываем пары знаменателя в режиме числителя и наоборот
+                    lessons = lessons.filter(l => {
+                        if (l.type === 'numerator') return isNumerator;
+                        if (l.type === 'denominator') return !isNumerator;
+                        return true;
+                    });
 
-        // Main App Component
-        const App = () => {
-            const [isLoading, setIsLoading] = useState(true);
-            const [weekType, setWeekType] = useState('numerator');
-            const [isDark, setIsDark] = useState(false);
-
-            useEffect(() => {
-                // Check system preference
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                setIsDark(prefersDark);
-            }, []);
-
-            useEffect(() => {
-                if (isDark) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            }, [isDark]);
-
-            const toggleTheme = () => {
-                setIsDark(!isDark);
-            };
-
-            if (isLoading) {
-                return <LoadingScreen onComplete={() => setIsLoading(false)} />;
-            }
-
-            return (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className={`min-h-screen transition-colors duration-500 ${isDark ? 'gradient-bg-dark' : 'gradient-bg-light'}`}
-                >
-                    {/* Header */}
-                    <motion.header
-                        initial={{ y: -100 }}
-                        animate={{ y: 0 }}
-                        transition={{ duration: 0.6, type: "spring" }}
-                        className={`sticky top-0 z-40 ${isDark ? 'glass-dark border-gray-700' : 'glass-light border-gray-200'} border-b transition-colors duration-500`}
-                    >
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between items-center h-20">
-                                {/* Logo */}
-                                <motion.div 
-                                    className="flex items-center gap-3"
-                                    whileHover={{ scale: 1.02 }}
-                                >
-                                    <motion.div
-                                        whileHover={{ rotate: 15 }}
-                                        className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30"
-                                    >
-                                        <i className="fas fa-code text-xl text-white"></i>
-                                    </motion.div>
-                                    <div>
-                                        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                                            ИСП<span className="text-blue-500">.24</span>
-                                        </h1>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Расписание занятий</p>
-                                    </div>
-                                </motion.div>
-
-                                {/* Theme Toggle */}
-                                <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+                    const dayHeader = `
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${day.color} flex items-center justify-center shadow-lg shadow-${day.color.split(' ')[1].replace('to-','')}/30">
+                                <i class="fa-solid ${day.icon} text-white text-sm"></i>
                             </div>
+                            <h2 class="text-xl font-bold text-white">${day.name}</h2>
                         </div>
-                    </motion.header>
+                    `;
 
-                    {/* Main Content */}
-                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        {/* Week Toggle */}
-                        <div className="flex justify-center mb-8">
-                            <WeekToggle weekType={weekType} onToggle={setWeekType} />
-                        </div>
+                    let lessonsHtml = '';
+                    if (lessons.length === 0) {
+                        lessonsHtml = `<div class="glass rounded-2xl p-6 text-center text-slate-500">Нет занятий</div>`;
+                    } else {
+                        lessonsHtml = lessons.map((l, i) => {
+                            const subject = getSubject(l);
+                            const badge = getBadge(l.type);
+                            return `
+                                <div class="schedule-card glass rounded-2xl p-5 hover:bg-slate-800/40 transition-colors" style="animation-delay: ${i * 80}ms">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-3 mb-2">
+                                                <span class="text-2xl font-bold gradient-text">${l.time}</span>
+                                                <span class="badge ${badge.cls}">${badge.text}</span>
+                                            </div>
+                                            <h3 class="text-lg font-semibold text-white truncate mb-1">${subject}</h3>
+                                            <div class="flex items-center gap-4 text-sm text-slate-400">
+                                                <span><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i>Каб. ${l.cabinet || '—'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
 
-                        {/* Legend */}
-                        <Legend />
+                    html += showAllDays 
+                        ? `<div class="glass rounded-3xl p-6">${dayHeader}<div class="space-y-3">${lessonsHtml}</div></div>`
+                        : dayHeader + `<div class="space-y-3">${lessonsHtml}</div>`;
+                });
 
-                        {/* Schedule Grid */}
-                        <motion.div 
-                            layout
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        >
-                            <AnimatePresence mode="popLayout">
-                                {daysConfig.map((day, index) => (
-                                    <DayCard 
-                                        key={day.id} 
-                                        dayConfig={day} 
-                                        weekType={weekType}
-                                        index={index}
-                                        isDark={isDark}
-                                    />
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
-                    </main>
+                if (showAllDays) html += '</div>';
+                container.innerHTML = html;
+                
+                requestAnimationFrame(() => { container.style.opacity = '1'; });
+            }, 200);
+        }
 
-                    {/* Footer */}
-                    <motion.footer
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.5 }}
-                        className={`text-center py-8 ${isDark ? 'text-gray-500' : 'text-gray-400'} text-sm`}
-                    >
-                        <p>© 2024 ИСП-24 • Расписание</p>
-                    </motion.footer>
-                </motion.div>
-            );
-        };
+        document.getElementById('weekToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            isNumerator = !isNumerator;
+            renderSchedule();
+        });
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        document.getElementById('allDaysBtn').addEventListener('click', function() {
+            showAllDays = !showAllDays;
+            this.classList.toggle('bg-violet-600/30', showAllDays);
+            this.classList.toggle('border-violet-500/50', showAllDays);
+            this.innerHTML = showAllDays ? '<i class="fa-solid fa-calendar-day"></i> Один день' : '<i class="fa-solid fa-grid-2"></i> Все дни';
+            document.getElementById('daysNav').style.display = showAllDays ? 'none' : 'grid';
+            renderSchedule();
+        });
     </script>
 </body>
 </html>

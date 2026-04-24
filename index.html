@@ -1,271 +1,1258 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ИСП-24 | Расписание</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { min-height: 100vh; background: #0b1120; color: #e2e8f0; overflow-x: hidden; }
-        
-        /* Loader */
-        #loader { position: fixed; inset: 0; z-index: 100; background: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
-        #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-spinner { width: 50px; height: 50px; border: 4px solid rgba(139, 92, 246, 0.2); border-top-color: #8b5cf6; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
-        .loader-text { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: pulse 2s infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐎 Цыгане — Легенды Коней 🐎</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;600;700&display=swap');
 
-        /* Glassmorphism & UI */
-        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        
-        .day-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .day-btn:hover { transform: translateY(-2px); background: rgba(30, 41, 59, 0.8); }
-        .day-btn.active { transform: scale(1.05); box-shadow: 0 0 20px var(--btn-glow); border-color: transparent; background: rgba(30, 41, 59, 0.9); }
-        
-        .schedule-card { animation: slideUp 0.4s ease forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        
-        .toggle-switch { width: 48px; height: 26px; background: #334155; border-radius: 13px; position: relative; cursor: pointer; transition: background 0.3s; }
-        .toggle-switch.active { background: #8b5cf6; }
-        .toggle-thumb { width: 20px; height: 20px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .toggle-switch.active .toggle-thumb { transform: translateX(22px); }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-        .badge-constant { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-numerator { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-        .badge-denominator { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
-        .badge-alternating { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
-        .badge-none { background: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); }
+:root {
+--gold: #FFD700;
+--deep-red: #8B0000;
+--royal: #4A0E4E;
+--dark: #1a0a0a;
+--fire: #FF4500;
+}
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0b1120; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        
-        .gradient-text { background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    </style>
+body {
+background: var(--dark);
+color: #fff;
+font-family: 'Montserrat', sans-serif;
+overflow-x: hidden;
+cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='24' font-size='24'></text></svg>"), auto;
+}
+
+/* === PRELOADER === */
+#preloader {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: radial-gradient(ellipse at center, #2a0a2a 0%, #0a0000 100%);
+z-index: 10000;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#preloader.hidden { opacity: 0; visibility: hidden; }
+.loader-horse {
+font-size: 80px;
+animation: loaderBounce 0.6s ease-in-out infinite alternate;
+}
+.loader-text {
+font-family: 'Ruslan Display', cursive;
+font-size: 28px;
+color: var(--gold);
+margin-top: 20px;
+animation: loaderPulse 1s ease-in-out infinite;
+}
+@keyframes loaderBounce {
+from { transform: translateY(0) rotate(-5deg); }
+to { transform: translateY(-40px) rotate(5deg); }
+}
+@keyframes loaderPulse {
+0%, 100% { opacity: 0.5; }
+50% { opacity: 1; }
+}
+
+/* === PARTICLES === */
+#particles-canvas {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+z-index: 0;
+pointer-events: none;
+}
+
+/* === FLOATING HORSES === */
+.floating-horse {
+position: fixed;
+font-size: 40px;
+z-index: 1;
+pointer-events: none;
+animation: floatAcross linear infinite;
+opacity: 0.6;
+}
+@keyframes floatAcross {
+0% { transform: translateX(-100px) translateY(0) rotate(0deg); }
+25% { transform: translateX(25vw) translateY(-30px) rotate(5deg); }
+50% { transform: translateX(50vw) translateY(20px) rotate(-3deg); }
+75% { transform: translateX(75vw) translateY(-20px) rotate(7deg); }
+100% { transform: translateX(calc(100vw + 100px)) translateY(0) rotate(0deg); }
+}
+
+/* === HERO SECTION === */
+.hero {
+position: relative;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-align: center;
+z-index: 2;
+overflow: hidden;
+}
+.hero::before {
+content: '';
+position: absolute;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background:
+radial-gradient(ellipse at 20% 50%, rgba(139,0,0,0.3) 0%, transparent 50%),
+radial-gradient(ellipse at 80% 50%, rgba(74,14,78,0.3) 0%, transparent 50%),
+radial-gradient(ellipse at 50% 100%, rgba(255,69,0,0.2) 0%, transparent 50%);
+animation: heroGlow 4s ease-in-out infinite alternate;
+}
+@keyframes heroGlow {
+0% { opacity: 0.6; }
+100% { opacity: 1; }
+}
+
+.hero-title {
+font-family: 'Ruslan Display', cursive;
+font-size: clamp(2.5rem, 8vw, 7rem);
+color: var(--gold);
+text-shadow:
+0 0 10px rgba(255,215,0,0.8),
+0 0 40px rgba(255,215,0,0.4),
+0 0 80px rgba(255,69,0,0.3),
+3px 3px 0 var(--deep-red);
+animation: titleFloat 3s ease-in-out infinite, titleGlow 2s ease-in-out infinite alternate;
+position: relative;
+z-index: 3;
+line-height: 1.1;
+}
+@keyframes titleFloat {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-15px); }
+}
+@keyframes titleGlow {
+0% { text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 40px rgba(255,215,0,0.4), 3px 3px 0 var(--deep-red); }
+100% { text-shadow: 0 0 20px rgba(255,215,0,1), 0 0 60px rgba(255,215,0,0.6), 0 0 100px rgba(255,69,0,0.4), 3px 3px 0 var(--deep-red); }
+}
+
+.hero-subtitle {
+font-family: 'Playfair Display', serif;
+font-size: clamp(1.2rem, 3vw, 2rem);
+color: #e0c080;
+margin-top: 20px;
+animation: subtitleFade 2s ease-in-out infinite alternate;
+position: relative;
+z-index: 3;
+}
+@keyframes subtitleFade {
+0% { opacity: 0.6; letter-spacing: 2px; }
+100% { opacity: 1; letter-spacing: 5px; }
+}
+
+.hero-horse-img {
+width: clamp(200px, 40vw, 500px);
+border-radius: 20px;
+margin: 30px 0;
+animation: horseHeroFloat 4s ease-in-out infinite, heroImageGlow 3s ease-in-out infinite alternate;
+position: relative;
+z-index: 3;
+box-shadow:
+0 0 30px rgba(255,215,0,0.3),
+0 0 60px rgba(139,0,0,0.3);
+border: 3px solid var(--gold);
+}
+@keyframes horseHeroFloat {
+0%, 100% { transform: translateY(0) scale(1); }
+50% { transform: translateY(-20px) scale(1.02); }
+}
+@keyframes heroImageGlow {
+0% { box-shadow: 0 0 30px rgba(255,215,0,0.3), 0 0 60px rgba(139,0,0,0.3); }
+100% { box-shadow: 0 0 50px rgba(255,215,0,0.6), 0 0 100px rgba(255,69,0,0.4); }
+}
+
+/* === SPARKLE DIVIDER === */
+.sparkle-divider {
+position: relative;
+height: 80px;
+overflow: hidden;
+z-index: 2;
+}
+.sparkle-divider::before {
+content: '🐎 ⭐ 🐴 ✨  ⭐ 🐴 ✨ 🐎 ⭐ 🐴 ✨ 🐎 ⭐ 🐴 ✨ 🐎 ⭐ 🐴 ✨';
+position: absolute;
+white-space: nowrap;
+font-size: 30px;
+animation: sparkleScroll 15s linear infinite;
+}
+@keyframes sparkleScroll {
+0% { transform: translateX(0); }
+100% { transform: translateX(-50%); }
+}
+
+/* === SECTION STYLES === */
+.section {
+position: relative;
+z-index: 2;
+padding: 80px 20px;
+}
+.section-title {
+font-family: 'Ruslan Display', cursive;
+font-size: clamp(2rem, 5vw, 4rem);
+text-align: center;
+color: var(--gold);
+text-shadow: 2px 2px 0 var(--deep-red);
+margin-bottom: 60px;
+animation: sectionTitlePulse 3s ease-in-out infinite;
+}
+@keyframes sectionTitlePulse {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.05); }
+}
+
+/* === TEAM CARDS === */
+.team-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 30px;
+max-width: 1200px;
+margin: 0 auto;
+}
+.team-card {
+background: linear-gradient(145deg, rgba(74,14,78,0.4), rgba(139,0,0,0.3));
+border: 2px solid var(--gold);
+border-radius: 20px;
+padding: 30px;
+text-align: center;
+position: relative;
+overflow: hidden;
+transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+animation: cardAppear 0.8s ease-out both;
+backdrop-filter: blur(10px);
+}
+.team-card::before {
+content: '';
+position: absolute;
+top: -50%; left: -50%;
+width: 200%; height: 200%;
+background: conic-gradient(from 0deg, transparent, var(--gold), transparent, var(--fire), transparent);
+animation: cardBorderRotate 4s linear infinite;
+opacity: 0;
+transition: opacity 0.3s;
+}
+.team-card:hover::before { opacity: 1; }
+.team-card::after {
+content: '';
+position: absolute;
+inset: 3px;
+background: linear-gradient(145deg, rgba(74,14,78,0.8), rgba(139,0,0,0.6));
+border-radius: 17px;
+z-index: 0;
+}
+.team-card > * { position: relative; z-index: 1; }
+@keyframes cardBorderRotate {
+100% { transform: rotate(360deg); }
+}
+@keyframes cardAppear {
+from { opacity: 0; transform: translateY(60px) scale(0.8); }
+to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.team-card:hover {
+transform: translateY(-15px) scale(1.05);
+box-shadow: 0 20px 60px rgba(255,215,0,0.3);
+}
+.team-card:nth-child(1) { animation-delay: 0.1s; }
+.team-card:nth-child(2) { animation-delay: 0.3s; }
+.team-card:nth-child(3) { animation-delay: 0.5s; }
+.team-card:nth-child(4) { animation-delay: 0.7s; }
+
+.card-avatar {
+width: 120px;
+height: 120px;
+border-radius: 50%;
+margin: 0 auto 20px;
+border: 3px solid var(--gold);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 60px;
+background: radial-gradient(circle, rgba(255,215,0,0.2), transparent);
+animation: avatarSpin 6s linear infinite;
+position: relative;
+}
+@keyframes avatarSpin {
+0% { box-shadow: 0 0 15px rgba(255,215,0,0.5); }
+50% { box-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,69,0,0.3); }
+100% { box-shadow: 0 0 15px rgba(255,215,0,0.5); }
+}
+.card-name {
+font-family: 'Playfair Display', serif;
+font-size: 1.5rem;
+color: var(--gold);
+margin-bottom: 8px;
+}
+.card-role {
+font-size: 0.9rem;
+color: #e0c080;
+margin-bottom: 15px;
+font-style: italic;
+}
+.card-desc {
+font-size: 0.85rem;
+color: #ccc;
+line-height: 1.6;
+}
+.card-horse-counter {
+margin-top: 15px;
+font-size: 0.8rem;
+color: var(--fire);
+animation: counterPulse 1s ease-in-out infinite;
+}
+@keyframes counterPulse {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.1); }
+}
+
+/* === HORSE GALLERY === */
+.gallery-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 25px;
+max-width: 1200px;
+margin: 0 auto;
+}
+.gallery-item {
+position: relative;
+border-radius: 15px;
+overflow: hidden;
+border: 2px solid var(--gold);
+animation: galleryItemFloat 4s ease-in-out infinite;
+transition: transform 0.5s;
+}
+.gallery-item:hover { transform: scale(1.05) rotate(1deg); }
+.gallery-item img {
+width: 100%;
+height: 250px;
+object-fit: cover;
+transition: transform 0.5s;
+}
+.gallery-item:hover img { transform: scale(1.15); }
+.gallery-overlay {
+position: absolute;
+bottom: 0; left: 0;
+width: 100%;
+padding: 20px;
+background: linear-gradient(transparent, rgba(0,0,0,0.8));
+}
+.gallery-overlay p {
+color: var(--gold);
+font-weight: 700;
+font-size: 1.1rem;
+}
+.gallery-item:nth-child(2) { animation-delay: 1s; }
+.gallery-item:nth-child(3) { animation-delay: 2s; }
+@keyframes galleryItemFloat {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-10px); }
+}
+
+/* === HORSE PARADE === */
+.parade-section {
+background: linear-gradient(180deg, var(--dark) 0%, #2a0a1a 50%, var(--dark) 100%);
+position: relative;
+z-index: 2;
+}
+.parade-track {
+position: relative;
+height: 200px;
+overflow: hidden;
+margin: 30px 0;
+}
+.parade-horse {
+position: absolute;
+font-size: 80px;
+animation: paradeRun 8s linear infinite;
+}
+.parade-horse:nth-child(1) { animation-duration: 6s; animation-delay: 0s; top: 20px; }
+.parade-horse:nth-child(2) { animation-duration: 7s; animation-delay: 1s; top: 60px; font-size: 60px; }
+.parade-horse:nth-child(3) { animation-duration: 5s; animation-delay: 2s; top: 10px; font-size: 100px; }
+.parade-horse:nth-child(4) { animation-duration: 9s; animation-delay: 0.5s; top: 80px; font-size: 50px; }
+.parade-horse:nth-child(5) { animation-duration: 6.5s; animation-delay: 3s; top: 40px; font-size: 70px; }
+.parade-horse:nth-child(6) { animation-duration: 7.5s; animation-delay: 1.5s; top: 100px; font-size: 90px; }
+.parade-horse:nth-child(7) { animation-duration: 5.5s; animation-delay: 2.5s; top: 30px; font-size: 55px; }
+.parade-horse:nth-child(8) { animation-duration: 8.5s; animation-delay: 0.8s; top: 120px; font-size: 45px; }
+@keyframes paradeRun {
+0% { left: -100px; }
+100% { left: calc(100% + 100px); }
+}
+
+/* === STATS === */
+.stats-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 30px;
+max-width: 1000px;
+margin: 0 auto;
+}
+.stat-item {
+text-align: center;
+padding: 30px;
+background: linear-gradient(145deg, rgba(74,14,78,0.5), rgba(139,0,0,0.3));
+border-radius: 15px;
+border: 1px solid var(--gold);
+animation: statPop 0.6s ease-out both;
+}
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.2s; }
+.stat-item:nth-child(3) { animation-delay: 0.3s; }
+.stat-item:nth-child(4) { animation-delay: 0.4s; }
+@keyframes statPop {
+from { opacity: 0; transform: scale(0.5); }
+to { opacity: 1; transform: scale(1); }
+}
+.stat-number {
+font-family: 'Ruslan Display', cursive;
+font-size: 3rem;
+color: var(--gold);
+animation: numberCount 2s ease-out forwards;
+}
+@keyframes numberCount {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.stat-label {
+color: #e0c080;
+margin-top: 10px;
+font-size: 0.9rem;
+}
+
+/* === HORSE RAIN === */
+.horse-rain-container {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+pointer-events: none;
+z-index: 1;
+}
+.rain-horse {
+position: absolute;
+top: -50px;
+font-size: 24px;
+animation: horseRain linear infinite;
+opacity: 0.4;
+}
+@keyframes horseRain {
+0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+10% { opacity: 0.4; }
+90% { opacity: 0.4; }
+100% { transform: translateY(calc(100vh + 50px)) rotate(360deg); opacity: 0; }
+}
+
+/* === QUOTE SECTION === */
+.quote-section {
+text-align: center;
+padding: 100px 20px;
+position: relative;
+z-index: 2;
+}
+.quote-text {
+font-family: 'Playfair Display', serif;
+font-size: clamp(1.5rem, 4vw, 2.5rem);
+color: var(--gold);
+font-style: italic;
+max-width: 800px;
+margin: 0 auto;
+line-height: 1.6;
+animation: quoteReveal 2s ease-out;
+}
+@keyframes quoteReveal {
+from { opacity: 0; transform: translateY(30px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.quote-horse {
+font-size: 60px;
+margin: 20px 0;
+animation: quoteHorseDance 2s ease-in-out infinite;
+}
+@keyframes quoteHorseDance {
+0%, 100% { transform: rotate(-10deg); }
+50% { transform: rotate(10deg); }
+}
+
+/* === MARQUEE === */
+.marquee-container {
+overflow: hidden;
+padding: 20px 0;
+background: linear-gradient(90deg, var(--deep-red), var(--royal), var(--deep-red));
+position: relative;
+z-index: 2;
+}
+.marquee-content {
+display: flex;
+white-space: nowrap;
+animation: marquee 20s linear infinite;
+font-size: 1.5rem;
+color: var(--gold);
+}
+@keyframes marquee {
+0% { transform: translateX(0); }
+100% { transform: translateX(-50%); }
+}
+
+/* === FOOTER === */
+.footer {
+text-align: center;
+padding: 40px 20px;
+background: linear-gradient(0deg, #0a0000, var(--dark));
+position: relative;
+z-index: 2;
+border-top: 2px solid var(--gold);
+}
+.footer p {
+color: #e0c080;
+font-size: 0.9rem;
+}
+.footer-horses {
+font-size: 30px;
+margin: 15px 0;
+animation: footerHorseSpin 3s linear infinite;
+}
+@keyframes footerHorseSpin {
+0% { transform: rotate(0deg) scale(1); }
+50% { transform: rotate(180deg) scale(1.2); }
+100% { transform: rotate(360deg) scale(1); }
+}
+
+/* === SPINNING HORSE WHEEL === */
+.wheel-section {
+text-align: center;
+padding: 60px 20px;
+position: relative;
+z-index: 2;
+}
+.horse-wheel {
+width: 300px;
+height: 300px;
+margin: 30px auto;
+position: relative;
+animation: wheelSpin 10s linear infinite;
+}
+@keyframes wheelSpin {
+100% { transform: rotate(360deg); }
+}
+.wheel-horse {
+position: absolute;
+font-size: 40px;
+}
+.wheel-horse:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
+.wheel-horse:nth-child(2) { top: 15%; right: 10%; }
+.wheel-horse:nth-child(3) { top: 50%; right: 0; transform: translateY(-50%); }
+.wheel-horse:nth-child(4) { bottom: 15%; right: 10%; }
+.wheel-horse:nth-child(5) { bottom: 0; left: 50%; transform: translateX(-50%); }
+.wheel-horse:nth-child(6) { bottom: 15%; left: 10%; }
+.wheel-horse:nth-child(7) { top: 50%; left: 0; transform: translateY(-50%); }
+.wheel-horse:nth-child(8) { top: 15%; left: 10%; }
+
+/* === BUTTON === */
+.horse-btn {
+display: inline-block;
+padding: 15px 40px;
+background: linear-gradient(145deg, var(--gold), var(--fire));
+color: var(--dark);
+font-family: 'Ruslan Display', cursive;
+font-size: 1.2rem;
+border: none;
+border-radius: 50px;
+cursor: pointer;
+transition: all 0.3s;
+animation: btnPulse 2s ease-in-out infinite;
+text-decoration: none;
+position: relative;
+z-index: 5;
+}
+.horse-btn:hover {
+transform: scale(1.15);
+box-shadow: 0 10px 40px rgba(255,215,0,0.5);
+}
+@keyframes btnPulse {
+0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.3); }
+50% { box-shadow: 0 0 30px rgba(255,215,0,0.6); }
+}
+
+/* === CONFETTI === */
+.confetti-piece {
+position: fixed;
+width: 10px;
+height: 10px;
+z-index: 9999;
+pointer-events: none;
+}
+
+/* === SCROLL REVEAL === */
+.reveal {
+opacity: 0;
+transform: translateY(40px);
+transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.reveal.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+/* === HORSE COUNTER === */
+.horse-counter-fixed {
+position: fixed;
+bottom: 20px;
+right: 20px;
+background: rgba(26,10,10,0.9);
+border: 2px solid var(--gold);
+border-radius: 15px;
+padding: 15px 20px;
+z-index: 100;
+font-family: 'Ruslan Display', cursive;
+color: var(--gold);
+font-size: 1.2rem;
+backdrop-filter: blur(10px);
+animation: counterBounce 2s ease-in-out infinite;
+}
+@keyframes counterBounce {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.05); }
+}
+
+/* === NAV === */
+.nav {
+position: fixed;
+top: 0; left: 0;
+width: 100%;
+padding: 15px 30px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+z-index: 1000;
+background: rgba(26,10,10,0.8);
+backdrop-filter: blur(15px);
+border-bottom: 1px solid rgba(255,215,0,0.3);
+}
+.nav-logo {
+font-family: 'Ruslan Display', cursive;
+font-size: 1.5rem;
+color: var(--gold);
+animation: logoGlow 2s ease-in-out infinite alternate;
+}
+@keyframes logoGlow {
+0% { text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+100% { text-shadow: 0 0 20px rgba(255,215,0,1); }
+}
+.nav-links {
+display: flex;
+gap: 25px;
+list-style: none;
+}
+.nav-links a {
+color: #e0c080;
+text-decoration: none;
+font-weight: 600;
+transition: all 0.3s;
+position: relative;
+}
+.nav-links a::after {
+content: '';
+position: absolute;
+bottom: -5px; left: 0;
+width: 0; height: 2px;
+background: var(--gold);
+transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-links a:hover::after { width: 100%; }
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+.nav-links { display: none; }
+.team-grid { grid-template-columns: 1fr; }
+.gallery-grid { grid-template-columns: 1fr; }
+.stats-grid { grid-template-columns: repeat(2, 1fr); }
+.horse-counter-fixed { font-size: 0.9rem; padding: 10px 15px; }
+}
+
+/* === BOUNCING HORSE EMOJI BG === */
+.bounce-bg {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+pointer-events: none;
+z-index: 0;
+}
+.bg-horse {
+position: absolute;
+font-size: 50px;
+opacity: 0.08;
+animation: bgHorseBounce 5s ease-in-out infinite;
+}
+@keyframes bgHorseBounce {
+0%, 100% { transform: translateY(0) rotate(0deg); }
+25% { transform: translateY(-30px) rotate(10deg); }
+50% { transform: translateY(0) rotate(0deg); }
+75% { transform: translateY(-20px) rotate(-10deg); }
+}
+
+/* === HORSE TRACK ANIMATION === */
+.horse-track {
+position: relative;
+z-index: 2;
+padding: 40px 0;
+overflow: hidden;
+}
+.track-line {
+height: 3px;
+background: linear-gradient(90deg, transparent, var(--gold), transparent);
+margin: 20px 0;
+animation: trackPulse 2s ease-in-out infinite;
+}
+@keyframes trackPulse {
+0%, 100% { opacity: 0.3; }
+50% { opacity: 1; }
+}
+
+/* === TYPEWRITER === */
+.typewriter {
+font-family: 'Playfair Display', serif;
+color: var(--gold);
+font-size: 1.3rem;
+overflow: hidden;
+white-space: nowrap;
+border-right: 3px solid var(--gold);
+animation: typing 3s steps(40) 1s forwards, blink 0.7s step-end infinite;
+width: 0;
+margin: 20px auto;
+max-width: fit-content;
+}
+@keyframes typing {
+from { width: 0; }
+to { width: 100%; }
+}
+@keyframes blink {
+50% { border-color: transparent; }
+}
+
+/* === WAVE HORSES === */
+.wave-section {
+position: relative;
+z-index: 2;
+padding: 60px 0;
+}
+.wave-horse {
+display: inline-block;
+font-size: 40px;
+animation: waveBounce 1s ease-in-out infinite;
+}
+.wave-horse:nth-child(1) { animation-delay: 0s; }
+.wave-horse:nth-child(2) { animation-delay: 0.1s; }
+.wave-horse:nth-child(3) { animation-delay: 0.2s; }
+.wave-horse:nth-child(4) { animation-delay: 0.3s; }
+.wave-horse:nth-child(5) { animation-delay: 0.4s; }
+.wave-horse:nth-child(6) { animation-delay: 0.5s; }
+.wave-horse:nth-child(7) { animation-delay: 0.6s; }
+.wave-horse:nth-child(8) { animation-delay: 0.7s; }
+.wave-horse:nth-child(9) { animation-delay: 0.8s; }
+.wave-horse:nth-child(10) { animation-delay: 0.9s; }
+@keyframes waveBounce {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-30px); }
+}
+.wave-container {
+display: flex;
+justify-content: center;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+/* === EXPLODING HORSES (on click) === */
+.explosion-horse {
+position: fixed;
+font-size: 30px;
+pointer-events: none;
+z-index: 9999;
+}
+</style>
 </head>
 <body>
-    <div id="loader"><div class="loader-spinner"></div><div class="loader-text">ИСП-24</div></div>
-    
-    <div class="p-4 md:p-8 max-w-6xl mx-auto opacity-0 transition-opacity duration-700" id="app">
-        <!-- Header -->
-        <header class="glass rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-purple-900/20">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                    <i class="fa-solid fa-graduation-cap text-2xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold gradient-text">ИСП-24</h1>
-                    <p class="text-slate-400 text-sm">Расписание занятий</p>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-6 justify-center">
-                <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-700/50">
-                    <span class="text-sm font-medium text-slate-300">Числитель</span>
-                    <div class="toggle-switch" id="weekToggle"><div class="toggle-thumb"></div></div>
-                    <span class="text-sm font-medium text-slate-500">Знаменатель</span>
-                </div>
-                <button id="allDaysBtn" class="px-4 py-2 rounded-xl bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 transition border border-slate-700/50 text-sm font-medium flex items-center gap-2">
-                    <i class="fa-solid fa-grid-2"></i> Все дни
-                </button>
-            </div>
-        </header>
 
-        <!-- Day Selector -->
-        <nav id="daysNav" class="glass rounded-3xl p-4 mb-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
-            <!-- Buttons injected by JS -->
-        </nav>
+<!-- Preloader -->
+<div id="preloader">
+<div class="loader-horse">🐎</div>
+<div class="loader-text">Цыгане едут...</div>
+</div>
 
-        <!-- Schedule -->
-        <main id="scheduleContainer" class="min-h-[300px]"></main>
-    </div>
+<!-- Particle Canvas -->
+<canvas id="particles-canvas"></canvas>
 
-    <script>
-        const scheduleData = {
-            monday: [
-                { time: "8:30–10:00", type: "constant", subject: "МДК 01.04", cabinet: "501" },
-                { time: "10:15–11:00", type: "constant", subject: "Классный час", cabinet: "552" },
-                { time: "11:10–12:40", type: "constant", subject: "МДК 01.01", cabinet: "501" },
-                { time: "13:10–14:40", type: "numerator", subject: "ОАиП", cabinet: "501" }
-            ],
-            tuesday: [
-                { time: "8:30–10:00", type: "constant", subject: "Числ. методы", cabinet: "540" },
-                { time: "10:15–11:45", type: "constant", subject: "ОСиС", cabinet: "529" },
-                { time: "12:15–13:45", type: "constant", subject: "Выш. мат.", cabinet: "357" },
-                { time: "13:55–15:35", type: "none", subject: "—", cabinet: "" }
-            ],
-            wednesday: [
-                { time: "8:30–10:00", type: "constant", subject: "Английский язык", cabinet: "2 корпус №25/27" },
-                { time: "10:15–11:45", type: "constant", subject: "МДК 04.01", cabinet: "563" },
-                { time: "12:15–13:45", type: "constant", subject: "МДК 04.02", cabinet: "552" },
-                { time: "13:55–15:25", type: "denominator", subject: "МДК 02.02", cabinet: "516" }
-            ],
-            thursday: [
-                { time: "8:30–10:00", type: "constant", subject: "Дис. мат.", cabinet: "357" },
-                { time: "10:15–11:45", type: "constant", subject: "Физкультура", cabinet: "" },
-                { time: "12:15–13:45", type: "constant", subject: "ОАиП", cabinet: "501" },
-                { time: "13:55–15:25", type: "none", subject: "—", cabinet: "" }
-            ],
-            friday: [
-                { time: "8:30–10:00", type: "constant", subject: "МДК 04.01", cabinet: "563" },
-                { time: "10:15–11:45", type: "constant", subject: "Дис. мат.", cabinet: "357" },
-                { time: "12:15–13:45", type: "alternating", subjectNumerator: "МДК 01.04", subjectDenominator: "МДК 01.01", cabinet: "501" }
-            ],
-            saturday: [
-                { time: "8:30–10:00", type: "constant", subject: "МДК 07.01", cabinet: "516" },
-                { time: "10:15–11:45", type: "constant", subject: "МДК 07.01", cabinet: "516" },
-                { time: "12:00–13:30", type: "constant", subject: "МДК 02.02", cabinet: "516" }
-            ]
-        };
+<!-- Floating Background Horses -->
+<div class="bounce-bg" id="bounceBg"></div>
 
-        const daysConfig = [
-            { id: 'monday', name: 'Понедельник', icon: 'fa-sun', color: 'from-orange-400 to-orange-500', glow: 'rgba(249, 115, 22, 0.5)' },
-            { id: 'tuesday', name: 'Вторник', icon: 'fa-cloud', color: 'from-blue-400 to-blue-500', glow: 'rgba(59, 130, 246, 0.5)' },
-            { id: 'wednesday', name: 'Среда', icon: 'fa-cloud-rain', color: 'from-cyan-400 to-cyan-500', glow: 'rgba(6, 182, 212, 0.5)' },
-            { id: 'thursday', name: 'Четверг', icon: 'fa-wind', color: 'from-emerald-400 to-emerald-500', glow: 'rgba(16, 185, 129, 0.5)' },
-            { id: 'friday', name: 'Пятница', icon: 'fa-umbrella', color: 'from-indigo-400 to-indigo-500', glow: 'rgba(99, 102, 241, 0.5)' },
-            { id: 'saturday', name: 'Суббота', icon: 'fa-crown', color: 'from-purple-400 to-purple-500', glow: 'rgba(168, 85, 247, 0.5)' }
-        ];
+<!-- Navigation -->
+<nav class="nav">
+<div class="nav-logo">🐎 ЦЫГАНЕ</div>
+<ul class="nav-links">
+<li><a href="#team">Команда</a></li>
+<li><a href="#gallery">Кони</a></li>
+<li><a href="#stats">Статистика</a></li>
+<li><a href="#parade">Парад</a></li>
+</ul>
+</nav>
 
-        let isNumerator = true;
-        let currentDay = 'monday';
-        let showAllDays = false;
+<!-- Horse Rain -->
+<div class="horse-rain-container" id="horseRain"></div>
 
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('app').classList.remove('opacity-0');
-                document.getElementById('weekToggle').classList.add('active');
-                renderDays();
-                renderSchedule();
-            }, 1500);
-        });
+<!-- Hero Section -->
+<section class="hero">
+<h1 class="hero-title">🐎 ЦЫГАНЕ 🐎</h1>
+<p class="hero-subtitle">Легенды Кона • Повелители Ветра • Дети Степи</p>
+<img class="hero-horse-img" src="https://image.qwenlm.ai/public_source/9188ba3c-bf2f-4de8-b8ba-d33a7f7d5210/1becfe91e-7c83-4ff9-bda5-2de81e1bf2e3.png" alt="Конь">
+<div class="typewriter">Они пришли. Они скачут. Они побеждают.</div>
+<a href="#team" class="horse-btn" style="margin-top:30px;">🐴 Познакомиться 🐴</a>
+</section>
 
-        function renderDays() {
-            const nav = document.getElementById('daysNav');
-            nav.innerHTML = daysConfig.map(day => `
-                <button class="day-btn glass rounded-2xl py-3 flex flex-col items-center gap-2 cursor-pointer ${day.id === currentDay ? 'active' : ''}" 
-                        data-day="${day.id}" style="--btn-glow: ${day.glow}">
-                    <i class="fa-solid ${day.icon} text-xl text-slate-400 group-hover:text-white transition-colors"></i>
-                    <span class="text-xs font-semibold text-slate-300">${day.name.slice(0, 2)}</span>
-                </button>
-            `).join('');
+<!-- Sparkle Divider -->
+<div class="sparkle-divider"></div>
 
-            nav.querySelectorAll('.day-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (showAllDays) return;
-                    nav.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentDay = btn.dataset.day;
-                    renderSchedule();
-                });
-            });
-        }
+<!-- Team Section -->
+<section class="section" id="team">
+<h2 class="section-title reveal"> Наша Банда 🐎</h2>
+<div class="team-grid">
+<div class="team-card reveal">
+<div class="card-avatar"></div>
+<h3 class="card-name">Яковлев Вадим</h3>
+<p class="card-role"> Главный Коневод 🐴</p>
+<p class="card-desc">Ведущий специалист по коням и цыганской культуре. Способен оседлать любого коня за 3 секунды. Владеет 127 лошадьми.</p>
+<div class="card-horse-counter">🐎 Купил коней: <span class="horse-count" data-target="127">0</span></div>
+</div>
+<div class="team-card reveal">
+<div class="card-avatar"></div>
+<h3 class="card-name">Мирошниченко Никита</h3>
+<p class="card-role">🐴 Повелитель Ветра 🐴</p>
+<p class="card-desc">Мастер верховой езды. Проехал 500 км без остановки. Его кони боятся опаздывать.</p>
+<div class="card-horse-counter">🐎 Купил коней: <span class="horse-count" data-target="89">0</span></div>
+</div>
+<div class="team-card reveal">
+<div class="card-avatar">🌟</div>
+<h3 class="card-name">Маликов Сергей</h3>
+<p class="card-role"> Конный Визионер 🐴</p>
+<p class="card-desc">Видит будущее через гриву коня. Предсказал 98 из 100 скачек. Легенда конного мира.</p>
+<div class="card-horse-counter"> Купил коней: <span class="horse-count" data-target="156">0</span></div>
+</div>
+<div class="team-card reveal">
+<div class="card-avatar"></div>
+<h3 class="card-name">Артур Шарипов</h3>
+<p class="card-role">🐴 Духовный Наставник Коней 🐴</p>
+<p class="card-desc">Говорит на языке лошадей. Все кони мира знают его по имени. Абсолютный чемпион коневодства.</p>
+<div class="card-horse-counter">🐎 Купил коней: <span class="horse-count" data-target="203">0</span></div>
+</div>
+</div>
+</section>
 
-        function getSubject(lesson) {
-            if (lesson.type === 'alternating') return isNumerator ? lesson.subjectNumerator : lesson.subjectDenominator;
-            return lesson.subject;
-        }
+<!-- Wave Horses -->
+<div class="wave-section">
+<div class="wave-container">
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐎</span>
+<span class="wave-horse"></span>
+<span class="wave-horse">🐎</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐎</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐎</span>
+<span class="wave-horse"></span>
+<span class="wave-horse">🐎</span>
+</div>
+</div>
 
-        function getBadge(type) {
-            const map = {
-                'constant': { cls: 'badge-constant', text: 'Постоянно' },
-                'numerator': { cls: 'badge-numerator', text: 'Числитель' },
-                'denominator': { cls: 'badge-denominator', text: 'Знаменатель' },
-                'alternating': { cls: 'badge-alternating', text: isNumerator ? 'Числитель' : 'Знаменатель' },
-                'none': { cls: 'badge-none', text: 'Окно' }
-            };
-            return map[type] || map['constant'];
-        }
+<!-- Horse Gallery -->
+<section class="section" id="gallery">
+<h2 class="section-title reveal">🏇 Галерея Коней 🏇</h2>
+<div class="gallery-grid">
+<div class="gallery-item reveal">
+<img src="https://image.qwenlm.ai/public_source/9188ba3c-bf2f-4de8-b8ba-d33a7f7d5210/1becfe91e-7c83-4ff9-bda5-2de81e1bf2e3.png" alt="Конь 1">
+<div class="gallery-overlay"><p>Конь Яковлева Вадима</p></div>
+</div>
+<div class="gallery-item reveal">
+<img src="https://image.qwenlm.ai/public_source/9188ba3c-bf2f-4de8-b8ba-d33a7f7d5210/180b59c15-bc1d-4749-96e3-d1083e9020f2.png" alt="Конь 2">
+<div class="gallery-overlay"><p>Конь Мирошниченко Никиты</p></div>
+</div>
+<div class="gallery-item reveal">
+<img src="https://image.qwenlm.ai/public_source/9188ba3c-bf2f-4de8-b8ba-d33a7f7d5210/138f7126b-79df-4907-8a11-acdc59d62700.png" alt="Конь 3">
+<div class="gallery-overlay"><p>Конь Маликова Сергея</p></div>
+</div>
+</div>
+</section>
 
-        function renderSchedule() {
-            const container = document.getElementById('scheduleContainer');
-            container.style.opacity = '0';
-            
-            setTimeout(() => {
-                let html = '';
-                const daysToShow = showAllDays ? daysConfig : daysConfig.filter(d => d.id === currentDay);
+<!-- Marquee -->
+<div class="marquee-container">
+<div class="marquee-content">
+🐎 ЦЫГАНЕ • КОНЬ • СКАЧКИ • ПОБЕДА •  ЦЫГАНЕ • КОНЬ • СКАЧКИ • ПОБЕДА •  ЦЫГАНЕ • КОНЬ • СКАЧКИ • ПОБЕДА • 🐴 ЦЫГАНЕ • КОНЬ • СКАЧКИ • ПОБЕДА •  ЦЫГАНЕ • КОНЬ • СКАЧКИ • ПОБЕДА • 🐴 ЦЫГАНЕ • КОНЬ • СКАЧКИ • ПОБЕДА •
+</div>
+</div>
 
-                if (showAllDays) {
-                    html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
-                }
+<!-- Quote Section -->
+<section class="quote-section">
+<div class="quote-horse">🐎</div>
+<p class="quote-text reveal">"Настоящий цыган не тот, кто много говорит, а тот, у кого много коней."</p>
+<div style="margin-top:20px;">
+<span style="font-size:50px; display:inline-block; animation: quoteHorseDance 1.5s ease-in-out infinite;">🐴</span>
+</div>
+<p class="reveal" style="color:#e0c080; margin-top:20px;">— Народная мудрость коневодов</p>
+</section>
 
-                daysToShow.forEach(day => {
-                    let lessons = scheduleData[day.id] || [];
-                    
-                    // Фильтрация: скрываем пары знаменателя в режиме числителя и наоборот
-                    lessons = lessons.filter(l => {
-                        if (l.type === 'numerator') return isNumerator;
-                        if (l.type === 'denominator') return !isNumerator;
-                        return true;
-                    });
+<!-- Stats Section -->
+<section class="section" id="stats">
+<h2 class="section-title reveal">📊 Статистика Кона 📊</h2>
+<div class="stats-grid">
+<div class="stat-item reveal">
+<div class="stat-number" data-target="575">0</div>
+<div class="stat-label">Коней в коллекции</div>
+</div>
+<div class="stat-item reveal">
+<div class="stat-number" data-target="999">0</div>
+<div class="stat-label">Километров проехали</div>
+</div>
+<div class="stat-item reveal">
+<div class="stat-number" data-target="42">0</div>
+<div class="stat-label">Побед в скачках</div>
+</div>
+<div class="stat-item reveal">
+<div class="stat-number" data-target="100">0</div>
+<div class="stat-label">% Цыгане</div>
+</div>
+</div>
+</section>
 
-                    const dayHeader = `
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${day.color} flex items-center justify-center shadow-lg shadow-${day.color.split(' ')[1].replace('to-','')}/30">
-                                <i class="fa-solid ${day.icon} text-white text-sm"></i>
-                            </div>
-                            <h2 class="text-xl font-bold text-white">${day.name}</h2>
-                        </div>
-                    `;
+<!-- Horse Track -->
+<div class="horse-track">
+<div class="track-line"></div>
+</div>
 
-                    let lessonsHtml = '';
-                    if (lessons.length === 0) {
-                        lessonsHtml = `<div class="glass rounded-2xl p-6 text-center text-slate-500">Нет занятий</div>`;
-                    } else {
-                        lessonsHtml = lessons.map((l, i) => {
-                            const subject = getSubject(l);
-                            const badge = getBadge(l.type);
-                            return `
-                                <div class="schedule-card glass rounded-2xl p-5 hover:bg-slate-800/40 transition-colors" style="animation-delay: ${i * 80}ms">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-3 mb-2">
-                                                <span class="text-2xl font-bold gradient-text">${l.time}</span>
-                                                <span class="badge ${badge.cls}">${badge.text}</span>
-                                            </div>
-                                            <h3 class="text-lg font-semibold text-white truncate mb-1">${subject}</h3>
-                                            <div class="flex items-center gap-4 text-sm text-slate-400">
-                                                <span><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i>Каб. ${l.cabinet || '—'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
+<!-- Parade Section -->
+<section class="section parade-section" id="parade">
+<h2 class="section-title reveal"> Парад Коней 🏇</h2>
+<div class="parade-track">
+<div class="parade-horse">🐎</div>
+<div class="parade-horse">🐴</div>
+<div class="parade-horse">🐎</div>
+<div class="parade-horse">🐴</div>
+<div class="parade-horse">🐎</div>
+<div class="parade-horse">🐴</div>
+<div class="parade-horse"></div>
+<div class="parade-horse">🐴</div>
+</div>
+<div class="parade-track">
+<div class="parade-horse" style="animation-direction: reverse;">🐴</div>
+<div class="parade-horse" style="animation-direction: reverse; animation-delay: 2s;">🐎</div>
+<div class="parade-horse" style="animation-direction: reverse; animation-delay: 4s;">🐴</div>
+<div class="parade-horse" style="animation-direction: reverse; animation-delay: 1s;">🐎</div>
+<div class="parade-horse" style="animation-direction: reverse; animation-delay: 3s;">🐴</div>
+</div>
+</section>
 
-                    html += showAllDays 
-                        ? `<div class="glass rounded-3xl p-6">${dayHeader}<div class="space-y-3">${lessonsHtml}</div></div>`
-                        : dayHeader + `<div class="space-y-3">${lessonsHtml}</div>`;
-                });
+<!-- Horse Wheel -->
+<section class="wheel-section">
+<h2 class="section-title reveal">🎡 Колесо Кона 🎡</h2>
+<div class="horse-wheel">
+<div class="wheel-horse">🐎</div>
+<div class="wheel-horse">🐴</div>
+<div class="wheel-horse"></div>
+<div class="wheel-horse">🐴</div>
+<div class="wheel-horse">🐎</div>
+<div class="wheel-horse">🐴</div>
+<div class="wheel-horse"></div>
+<div class="wheel-horse">🐴</div>
+</div>
+</section>
 
-                if (showAllDays) html += '</div>';
-                container.innerHTML = html;
-                
-                requestAnimationFrame(() => { container.style.opacity = '1'; });
-            }, 200);
-        }
+<!-- Second Marquee -->
+<div class="marquee-container" style="background: linear-gradient(90deg, var(--royal), var(--deep-red), var(--royal));">
+<div class="marquee-content" style="animation-direction: reverse;">
+🐴 ЯКОВЛЕВ ВАДИМ 🐴 МИРОШНИЧЕНКО НИКИТА 🐴 МАЛИКОВ СЕРГЕЙ 🐴 АРТУР ШАРИПОВ 🐴
+🐴 ЯКОВЛЕВ ВАДИМ 🐴 МИРОШНИЧЕНКО НИКИТА 🐴 МАЛИКОВ СЕРГЕЙ 🐴 АРТУР ШАРИПОВ 🐴
+</div>
+</div>
 
-        document.getElementById('weekToggle').addEventListener('click', function() {
-            this.classList.toggle('active');
-            isNumerator = !isNumerator;
-            renderSchedule();
-        });
+<!-- More Wave Horses -->
+<div class="wave-section">
+<div class="wave-container">
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse"></span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse"></span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+<span class="wave-horse">🐴</span>
+</div>
+</div>
 
-        document.getElementById('allDaysBtn').addEventListener('click', function() {
-            showAllDays = !showAllDays;
-            this.classList.toggle('bg-violet-600/30', showAllDays);
-            this.classList.toggle('border-violet-500/50', showAllDays);
-            this.innerHTML = showAllDays ? '<i class="fa-solid fa-calendar-day"></i> Один день' : '<i class="fa-solid fa-grid-2"></i> Все дни';
-            document.getElementById('daysNav').style.display = showAllDays ? 'none' : 'grid';
-            renderSchedule();
-        });
-    </script>
+<!-- Footer -->
+<footer class="footer">
+<div class="footer-horses">🐎🐴🐎🐴🐎🐴🐎🐴</div>
+<p style="font-family: 'Ruslan Display', cursive; font-size: 1.3rem; color: var(--gold); margin-bottom: 15px;">
+Яковлев Вадим • Мирошниченко Никита • Маликов Сергей • Артур Шарипов
+</p>
+<p>© 2026 Цыгане. Все кони защищены.</p>
+<p style="margin-top:10px; font-size: 0.8rem; color: #888;">Сделано с 🐎 и любовью к коням</p>
+<div style="margin-top: 20px;">
+<span style="font-size: 40px; display: inline-block; animation: footerHorseSpin 2s linear infinite;">🐎</span>
+<span style="font-size: 40px; display: inline-block; animation: footerHorseSpin 2s linear infinite; animation-delay: 0.3s;">🐴</span>
+<span style="font-size: 40px; display: inline-block; animation: footerHorseSpin 2s linear infinite; animation-delay: 0.6s;"></span>
+<span style="font-size: 40px; display: inline-block; animation: footerHorseSpin 2s linear infinite; animation-delay: 0.9s;">🐴</span>
+<span style="font-size: 40px; display: inline-block; animation: footerHorseSpin 2s linear infinite; animation-delay: 1.2s;">🐎</span>
+</div>
+</footer>
+
+<!-- Fixed Horse Counter -->
+<div class="horse-counter-fixed" id="horseCounter">
+🐎 Кони на сайте: <span id="totalHorses">0</span>
+</div>
+
+<script>
+// === PRELOADER ===
+window.addEventListener('load', () => {
+setTimeout(() => {
+document.getElementById('preloader').classList.add('hidden');
+}, 2000);
+});
+
+// === PARTICLES ===
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const particles = [];
+const horseEmojis = ['🐎', '🐴', '⭐', '✨', '🌟', '💫'];
+
+class Particle {
+constructor() {
+this.reset();
+}
+reset() {
+this.x = Math.random() * canvas.width;
+this.y = Math.random() * canvas.height;
+this.size = Math.random() * 3 + 1;
+this.speedX = (Math.random() - 0.5) * 0.5;
+this.speedY = (Math.random() - 0.5) * 0.5;
+this.opacity = Math.random() * 0.5 + 0.1;
+this.emoji = horseEmojis[Math.floor(Math.random() * horseEmojis.length)];
+this.isEmoji = Math.random() > 0.7;
+}
+update() {
+this.x += this.speedX;
+this.y += this.speedY;
+if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+this.reset();
+}
+}
+draw() {
+if (this.isEmoji) {
+ctx.globalAlpha = this.opacity;
+ctx.font = `${this.size * 5}px serif`;
+ctx.fillText(this.emoji, this.x, this.y);
+} else {
+ctx.globalAlpha = this.opacity;
+ctx.fillStyle = '#FFD700';
+ctx.beginPath();
+ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+ctx.fill();
+}
+ctx.globalAlpha = 1;
+}
+}
+
+for (let i = 0; i < 80; i++) {
+particles.push(new Particle());
+}
+
+function animateParticles() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+particles.forEach(p => {
+p.update();
+p.draw();
+});
+requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+window.addEventListener('resize', () => {
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+});
+
+// === FLOATING BACKGROUND HORSES ===
+const bounceBg = document.getElementById('bounceBg');
+for (let i = 0; i < 20; i++) {
+const horse = document.createElement('div');
+horse.className = 'bg-horse';
+horse.textContent = Math.random() > 0.5 ? '🐎' : '🐴';
+horse.style.left = Math.random() * 100 + '%';
+horse.style.top = Math.random() * 100 + '%';
+horse.style.animationDelay = Math.random() * 5 + 's';
+horse.style.animationDuration = (3 + Math.random() * 4) + 's';
+bounceBg.appendChild(horse);
+}
+
+// === HORSE RAIN ===
+const rainContainer = document.getElementById('horseRain');
+function createRainHorse() {
+const horse = document.createElement('div');
+horse.className = 'rain-horse';
+horse.textContent = Math.random() > 0.5 ? '🐎' : '';
+horse.style.left = Math.random() * 100 + '%';
+horse.style.fontSize = (15 + Math.random() * 25) + 'px';
+const duration = 4 + Math.random() * 6;
+horse.style.animationDuration = duration + 's';
+horse.style.animationDelay = Math.random() * 2 + 's';
+rainContainer.appendChild(horse);
+setTimeout(() => horse.remove(), (duration + 2) * 1000);
+}
+setInterval(createRainHorse, 500);
+
+// === FLOATING HORSES ACROSS SCREEN ===
+function createFloatingHorse() {
+const horse = document.createElement('div');
+horse.className = 'floating-horse';
+horse.textContent = Math.random() > 0.5 ? '' : '🐴';
+horse.style.top = Math.random() * 100 + '%';
+horse.style.fontSize = (25 + Math.random() * 40) + 'px';
+const duration = 8 + Math.random() * 12;
+horse.style.animationDuration = duration + 's';
+document.body.appendChild(horse);
+setTimeout(() => horse.remove(), duration * 1000);
+}
+setInterval(createFloatingHorse, 3000);
+
+// === SCROLL REVEAL ===
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, { threshold: 0.1 });
+
+revealElements.forEach(el => observer.observe(el));
+
+// === COUNTER ANIMATION ===
+function animateCounter(element, target) {
+let current = 0;
+const increment = target / 60;
+const timer = setInterval(() => {
+current += increment;
+if (current >= target) {
+current = target;
+clearInterval(timer);
+}
+element.textContent = Math.floor(current);
+}, 30);
+}
+
+// Counter observer
+const counterElements = document.querySelectorAll('.horse-count, .stat-number');
+const counterObserver = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+const target = parseInt(entry.target.getAttribute('data-target'));
+animateCounter(entry.target, target);
+counterObserver.unobserve(entry.target);
+}
+});
+}, { threshold: 0.5 });
+
+counterElements.forEach(el => counterObserver.observe(el));
+
+// === TOTAL HORSE COUNTER ===
+let horseCount = 0;
+const totalDisplay = document.getElementById('totalHorses');
+setInterval(() => {
+horseCount += Math.floor(Math.random() * 3) + 1;
+totalDisplay.textContent = horseCount;
+}, 2000);
+
+// === CLICK EXPLOSION ===
+document.addEventListener('click', (e) => {
+for (let i = 0; i < 8; i++) {
+const horse = document.createElement('div');
+horse.className = 'explosion-horse';
+horse.textContent = Math.random() > 0.5 ? '🐎' : '🐴';
+horse.style.left = e.clientX + 'px';
+horse.style.top = e.clientY + 'px';
+
+const angle = (Math.PI * 2 / 8) * i;
+const velocity = 80 + Math.random() * 60;
+const dx = Math.cos(angle) * velocity;
+const dy = Math.sin(angle) * velocity;
+
+document.body.appendChild(horse);
+
+let posX = 0, posY = 0, opacity = 1;
+const animInterval = setInterval(() => {
+posX += dx * 0.05;
+posY += dy * 0.05 + 1;
+opacity -= 0.02;
+horse.style.transform = `translate(${posX}px, ${posY}px) rotate(${posX * 2}deg)`;
+horse.style.opacity = opacity;
+if (opacity <= 0) {
+clearInterval(animInterval);
+horse.remove();
+}
+}, 16);
+}
+});
+
+// === CONFETTI ON BUTTON ===
+document.querySelectorAll('.horse-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+for (let i = 0; i < 50; i++) {
+setTimeout(() => {
+const confetti = document.createElement('div');
+confetti.className = 'confetti-piece';
+confetti.textContent = Math.random() > 0.5 ? '🐎' : '🐴';
+confetti.style.left = Math.random() * 100 + 'vw';
+confetti.style.top = '-50px';
+confetti.style.fontSize = (15 + Math.random() * 25) + 'px';
+confetti.style.animation = `horseRain ${3 + Math.random() * 4}s linear forwards`;
+confetti.style.zIndex = '9999';
+document.body.appendChild(confetti);
+setTimeout(() => confetti.remove(), 7000);
+}, i * 50);
+}
+});
+});
+
+// === PARALLAX ON MOUSE ===
+document.addEventListener('mousemove', (e) => {
+const heroImg = document.querySelector('.hero-horse-img');
+if (heroImg) {
+const x = (e.clientX / window.innerWidth - 0.5) * 20;
+const y = (e.clientY / window.innerHeight - 0.5) * 20;
+heroImg.style.transform = `translate(${x}px, ${y}px)`;
+}
+});
+
+// === SMOOTH SCROLL ===
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+anchor.addEventListener('click', function(e) {
+e.preventDefault();
+const target = document.querySelector(this.getAttribute('href'));
+if (target) {
+target.scrollIntoView({ behavior: 'smooth' });
+}
+});
+});
+</script>
 </body>
 </html>
 

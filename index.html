@@ -341,7 +341,69 @@
         .toast.error { background: var(--red); }
         .toast.info { background: var(--blue-accent); }
         @keyframes toastIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
-@keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
+        @keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
+        
+        @media (max-width: 768px) {
+            body { padding-bottom: 70px; }
+            .header-inner { padding: 10px 16px; }
+            .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--primary); flex-direction: column; padding: 12px; }
+            .nav-links.open { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .hero { padding: 40px 16px; }
+            .hero h1 { font-size: 1.5rem; margin-bottom: 10px; }
+            .hero p { font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; }
+            .hero-stats { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .hero-stat-num { font-size: 1.4rem; }
+            .hero-stat-label { font-size: 0.75rem; }
+            .controls-section { margin-top: -10px; }
+            .controls-card { padding: 16px; }
+            .search-row { gap: 8px; margin-bottom: 10px; }
+            .search-input { padding: 14px 16px 14px 44px; font-size: 1rem; }
+            .filter-tags { gap: 6px; }
+            .filter-tag { padding: 10px 18px; font-size: 0.9rem; }
+            .songs-grid { grid-template-columns: 1fr; gap: 16px; }
+            .song-card { min-height: 140px; }
+            .song-card:hover { transform: none; }
+            .song-card:active { transform: scale(0.98); }
+            .song-card-title { font-size: 1.1rem; }
+            .song-card-author { font-size: 0.9rem; }
+            .song-preview { font-size: 0.9rem; }
+            .song-open-btn { padding: 12px 24px; font-size: 1rem; }
+            .modal { max-width: 95vw; border-radius: 20px; }
+            .modal-header { padding: 20px; }
+            .modal-body { padding: 20px; }
+            .modal-title { font-size: 1.3rem; }
+            .modal-lyrics { font-size: 1rem; line-height: 1.8; }
+            .auth-modal { max-width: 95vw; }
+            .form-input { padding: 14px; font-size: 1rem; }
+            .auth-btn { padding: 14px 28px; font-size: 1rem; }
+            .chat-input-area .comment-input { padding: 14px; font-size: 1rem; }
+            .chat-send-btn { padding: 14px; }
+            .pm-card { flex-direction: column; height: 70vh; }
+            .pm-sidebar { width: 100%; max-height: 200px; }
+            .pm-dialog-item { padding: 16px; }
+            .profile-avatar-large { width: 90px; height: 90px; }
+            .profile-form { padding: 0 20px 28px; }
+            footer { padding: 24px 16px; }
+            .footer-logo { font-size: 1.1rem; }
+            .footer-verse { font-size: 0.82rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .hero { padding: 30px 12px; }
+            .hero h1 { font-size: 1.3rem; }
+            .hero-stat-num { font-size: 1.2rem; }
+            .hero-stats { gap: 10px; }
+            .controls-card { padding: 12px; }
+            .search-input { padding: 12px 14px 12px 40px; font-size: 0.95rem; }
+            .filter-tag { padding: 8px 14px; font-size: 0.85rem; }
+            .pm-card { height: 75vh; }
+            .pm-sidebar { max-height: 150px; }
+            .pm-dialog-item { padding: 12px; gap: 10px; }
+            .pm-dialog-avatar { width: 36px; height: 36px; }
+            .logo-text { font-size: 1.1rem; }
+            .hero p { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>

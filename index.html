@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Молодежь церкви Живое Слово</title>
     <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.16/700.min.css" rel="stylesheet">
@@ -343,67 +343,187 @@
         @keyframes toastIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
         @keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
         
+        /* ===== MOBILE ADAPTATION ===== */
         @media (max-width: 768px) {
-            body { padding-bottom: 70px; }
-            .header-inner { padding: 10px 16px; }
-            .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--primary); flex-direction: column; padding: 12px; }
-            .nav-links.open { display: flex; }
-            .mobile-menu-btn { display: block; }
-            .hero { padding: 40px 16px; }
-            .hero h1 { font-size: 1.5rem; margin-bottom: 10px; }
-            .hero p { font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; }
-            .hero-stats { gap: 16px; flex-wrap: wrap; justify-content: center; }
-            .hero-stat-num { font-size: 1.4rem; }
-            .hero-stat-label { font-size: 0.75rem; }
-            .controls-section { margin-top: -10px; }
-            .controls-card { padding: 16px; }
-            .search-row { gap: 8px; margin-bottom: 10px; }
-            .search-input { padding: 14px 16px 14px 44px; font-size: 1rem; }
-            .filter-tags { gap: 6px; }
-            .filter-tag { padding: 10px 18px; font-size: 0.9rem; }
-            .songs-grid { grid-template-columns: 1fr; gap: 16px; }
-            .song-card { min-height: 140px; }
-            .song-card:hover { transform: none; }
-            .song-card:active { transform: scale(0.98); }
+            body { 
+                padding-bottom: calc(80px + env(safe-area-inset-bottom)); 
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .header-inner { padding: 12px 16px; }
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: none; }
+            
+            .hero { padding: 30px 16px 20px; }
+            .hero h1 { font-size: 1.6rem; margin-bottom: 12px; }
+            .hero p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
+            .hero-stats { gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+            .hero-stat-num { font-size: 1.5rem; }
+            .hero-stat-label { font-size: 0.78rem; }
+            
+            .controls-section { margin-top: -10px; padding: 0 12px; }
+            .controls-card { padding: 16px; margin: 0 4px; border-radius: 16px; }
+            .search-row { gap: 10px; margin-bottom: 12px; flex-wrap: nowrap; }
+            .search-input-wrap svg { left: 14px; width: 18px; height: 18px; }
+            .search-input { padding: 12px 14px 12px 40px; font-size: 0.95rem; min-height: 44px; }
+            .sort-select { padding: 12px 36px 12px 14px; font-size: 0.9rem; min-height: 44px; }
+            .filter-tags { 
+                gap: 8px; 
+                flex-wrap: nowrap; 
+                overflow-x: auto; 
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .filter-tags::-webkit-scrollbar { height: 0; }
+            .filter-tag { 
+                padding: 8px 16px; 
+                font-size: 0.85rem; 
+                min-height: 44px; 
+                white-space: nowrap; 
+                flex-shrink: 0;
+            }
+            
+            .songs-section { padding: 0 12px; }
+            .songs-grid { grid-template-columns: 1fr; gap: 14px; }
+            .song-card { 
+                border-radius: 14px; 
+                min-height: 130px; 
+                transition: none;
+            }
+            .song-card:active { transform: scale(0.97); }
+            .song-card-header { padding: 18px; border-radius: 14px 14px 0 0; }
             .song-card-title { font-size: 1.1rem; }
-            .song-card-author { font-size: 0.9rem; }
-            .song-preview { font-size: 0.9rem; }
-            .song-open-btn { padding: 12px 24px; font-size: 1rem; }
-            .modal { max-width: 95vw; border-radius: 20px; }
-            .modal-header { padding: 20px; }
-            .modal-body { padding: 20px; }
-            .modal-title { font-size: 1.3rem; }
-            .modal-lyrics { font-size: 1rem; line-height: 1.8; }
-            .auth-modal { max-width: 95vw; }
-            .form-input { padding: 14px; font-size: 1rem; }
-            .auth-btn { padding: 14px 28px; font-size: 1rem; }
-            .chat-input-area .comment-input { padding: 14px; font-size: 1rem; }
-            .chat-send-btn { padding: 14px; }
-            .pm-card { flex-direction: column; height: 70vh; }
-            .pm-sidebar { width: 100%; max-height: 200px; }
-            .pm-dialog-item { padding: 16px; }
-            .profile-avatar-large { width: 90px; height: 90px; }
-            .profile-form { padding: 0 20px 28px; }
+            .song-card-author { font-size: 0.88rem; }
+            .song-preview { font-size: 0.88rem; line-height: 1.6; }
+            .song-card-footer { padding: 12px 18px; }
+            .song-open-btn { padding: 10px 20px; font-size: 0.95rem; min-height: 44px; }
+            
+            .modal-overlay { padding: 12px; align-items: flex-end; }
+            .modal, .auth-modal { 
+                max-width: 100%; 
+                width: 100%; 
+                border-radius: 20px 20px 0 0; 
+                max-height: 85vh;
+                transform: translateY(100%);
+                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            }
+            .modal-overlay.active .modal,
+            .modal-overlay.active .auth-modal { transform: translateY(0); }
+            .modal-header { padding: 24px 20px 16px; border-radius: 20px 20px 0 0; }
+            .modal-title { font-size: 1.4rem; }
+            .modal-body, .auth-form-body { padding: 20px 16px; }
+            .modal-lyrics { font-size: 0.95rem; line-height: 1.8; margin-bottom: 20px; padding-bottom: 20px; }
+            
+            .chat-section { padding: 0 12px; }
+            .chat-card { border-radius: 14px; height: calc(70vh - 20px); }
+            .chat-header-bar { padding: 16px 14px; border-radius: 14px 14px 0 0; }
+            .chat-header-bar h2 { font-size: 1.1rem; }
+            .chat-messages { padding: 14px; max-height: calc(70vh - 120px); gap: 10px; }
+            .chat-msg-avatar { width: 32px; height: 32px; }
+            .chat-msg-content { padding: 8px 14px; border-radius: 12px 12px 12px 4px; }
+            .chat-input-area { padding: 12px 14px; gap: 8px; }
+            .chat-send-btn { padding: 10px 16px; min-height: 44px; }
+            
+            .pm-section { padding: 0 12px; }
+            .pm-card { 
+                flex-direction: column; 
+                height: calc(75vh - 20px); 
+                border-radius: 14px;
+            }
+            .pm-sidebar { 
+                width: 100%; 
+                display: block;
+                border-radius: 14px 14px 0 0;
+            }
+            .pm-chat-area { 
+                display: none;
+                border-radius: 0 0 14px 14px;
+            }
+            .pm-chat-area.active { display: flex; }
+            .pm-sidebar-header { padding: 14px 16px; }
+            .pm-dialog-item { 
+                padding: 14px; 
+                min-height: 56px;
+                gap: 12px;
+            }
+            .pm-dialog-avatar { width: 36px; height: 36px; }
+            .pm-dialog-name { font-size: 0.95rem; }
+            .pm-chat-header { padding: 14px; gap: 10px; }
+            .pm-chat-messages { padding: 14px; max-height: calc(75vh - 180px); }
+            .pm-back-btn { display: block; }
+            
+            .pm-chat-area { display: none; }
+            
             footer { padding: 24px 16px; }
             .footer-logo { font-size: 1.1rem; }
-            .footer-verse { font-size: 0.82rem; }
         }
         
         @media (max-width: 480px) {
-            .hero { padding: 30px 12px; }
-            .hero h1 { font-size: 1.3rem; }
-            .hero-stat-num { font-size: 1.2rem; }
-            .hero-stats { gap: 10px; }
-            .controls-card { padding: 12px; }
-            .search-input { padding: 12px 14px 12px 40px; font-size: 0.95rem; }
-            .filter-tag { padding: 8px 14px; font-size: 0.85rem; }
-            .pm-card { height: 75vh; }
-            .pm-sidebar { max-height: 150px; }
-            .pm-dialog-item { padding: 12px; gap: 10px; }
-            .pm-dialog-avatar { width: 36px; height: 36px; }
-            .logo-text { font-size: 1.1rem; }
-            .hero p { font-size: 0.85rem; }
+            .hero { padding: 24px 12px 16px; }
+            .hero h1 { font-size: 1.4rem; }
+            .hero-stat-num { font-size: 1.3rem; }
+            .hero-stats { gap: 12px; }
+            .controls-card { padding: 14px; margin: 0; }
+            .search-input { padding: 11px 12px 11px 38px; font-size: 0.9rem; }
+            .filter-tag { padding: 7px 14px; font-size: 0.8rem; }
+            
+            .song-card-header { padding: 16px; }
+            .song-card-title { font-size: 1rem; }
+            .song-open-btn { padding: 9px 18px; font-size: 0.9rem; }
+            
+            .chat-header-bar { padding: 14px; }
+            .chat-msg-avatar { width: 28px; height: 28px; }
+            .chat-msg-content { padding: 7px 12px; font-size: 0.85rem; }
+            
+            .pm-dialog-item { padding: 12px; min-height: 52px; }
+            .pm-dialog-avatar { width: 32px; height: 32px; }
         }
+        
+        /* Bottom Navigation for Mobile */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid #e8e4dc;
+            padding: calc(8px + env(safe-area-inset-bottom)) 12px 8px;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+        .bottom-nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            min-width: 44px;
+            min-height: 44px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        .bottom-nav-item.active { color: var(--gold); }
+        .bottom-nav-item svg { width: 22px; height: 22px; stroke: var(--text-lighter); }
+        .bottom-nav-item.active svg { stroke: var(--gold); }
+        .bottom-nav-item span { font-size: 0.65rem; color: var(--text-lighter); }
+        .bottom-nav-item.active span { color: var(--gold); font-weight: 600; }
+        
+        @media (max-width: 768px) {
+            .bottom-nav { display: block; }
+        }
+        
+        /* Safe area for iPhone notch */
+        .safe-top { padding-top: env(safe-area-inset-top); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
 <body>
@@ -508,10 +628,13 @@
 <div class="page" id="page-pm">
     <section class="pm-section">
         <div class="pm-card" id="pmCard">
-            <div class="pm-sidebar">
+            <div class="pm-sidebar" id="pmSidebar">
                 <div class="pm-sidebar-header">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                    <h3>Сообщения</h3>
+                    <h3>Участники</h3>
+                    <button class="pm-back-btn" onclick="showPmContacts()" style="display:none;margin-left:auto;background:none;border:none;color:white;cursor:pointer;">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
                 </div>
                 <div class="pm-search">
                     <input type="text" id="pmSearchInput" placeholder="Поиск участников..." oninput="renderPmDialogs()">
@@ -1271,6 +1394,11 @@
         currentPmUser = otherUserId;
         renderPmDialogs();
         
+        if (window.innerWidth <= 768) {
+            document.getElementById('pmSidebar').style.display = 'none';
+            document.getElementById('pmChatArea').style.display = 'flex';
+        }
+        
         const userDoc = await db.collection('users').doc(otherUserId).get();
         const otherUser = userDoc.data();
         
@@ -1299,10 +1427,14 @@
 
     function renderPmChatArea(otherUser, messages) {
         const area = document.getElementById('pmChatArea');
+        const backBtn = '<button class="pm-back-btn" onclick="showPmContacts()" style="display:none;margin-left:auto;background:none;border:none;color:white;cursor:pointer;font-size:1.5rem;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>';
+        const backBtnHtml = window.innerWidth <= 768 ? backBtn : '';
+        
         area.innerHTML = `
             <div class="pm-chat-header">
                 <div class="pm-chat-header-avatar">${renderAvatarHTML(otherUser.id, otherUser.username || 'User', '36px')}</div>
                 <div><div class="pm-chat-header-name">${escapeHtml(otherUser.username || 'User')}</div></div>
+                ${backBtnHtml}
             </div>
             <div class="pm-chat-messages" id="pmChatMessages">
                 ${messages.map(msg => `
@@ -1322,6 +1454,11 @@
             const msgsDiv = document.getElementById('pmChatMessages');
             if (msgsDiv) msgsDiv.scrollTop = msgsDiv.scrollHeight;
         }, 100);
+    }
+    
+    function showPmContacts() {
+        document.getElementById('pmSidebar').style.display = 'block';
+        document.getElementById('pmChatArea').style.display = 'none';
     }
 
     async function sendPmMessage() {
@@ -1507,9 +1644,16 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(`page-${page}`).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
         if (btn) btn.classList.add('active');
+        const bottomNav = document.querySelector(`.bottom-nav-item[onclick*="showPage('${page}"`);
+        if (bottomNav) bottomNav.classList.add('active');
         document.getElementById('heroSection').style.display = page === 'songs' ? '' : 'none';
         document.getElementById('navLinks').classList.remove('open');
+        if (page === 'pm') {
+            document.getElementById('pmSidebar').style.display = 'block';
+            document.getElementById('pmChatArea').style.display = 'none';
+        }
         window.scrollTo(0, 0);
         if (page === 'pm') renderPmDialogs();
         if (page === 'chat') loadChat();
@@ -1554,8 +1698,24 @@
 
 
 </script>
-
-
+ 
+    <nav class="bottom-nav">
+        <div class="bottom-nav-items">
+            <button class="bottom-nav-item active" onclick="showPage('songs', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 18V5l9-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                <span>Песни</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showPage('chat', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                <span>Чат</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showPage('pm', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><circle cx="8" cy="9" r="1"/><circle cx="12" cy="9" r="1"/><circle cx="16" cy="9" r="1"/></svg>
+                <span>Сообщения</span>
+            </button>
+        </div>
+    </nav>
+ 
 </body>
 
 

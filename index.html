@@ -427,11 +427,6 @@
     <div class="hero-content">
         <h1>Пойте <span>Господу</span> песнь новую</h1>
         <p>Собрание христианских песен для молодёжи. Ищите, находите и поклоняйтесь через музыку и слово.</p>
-        <div class="hero-stats">
-            <div class="hero-stat"><div class="hero-stat-num" id="statSongs">0</div><div class="hero-stat-label">Песен</div></div>
-            <div class="hero-stat"><div class="hero-stat-num">6</div><div class="hero-stat-label">Категорий</div></div>
-            <div class="hero-stat"><div class="hero-stat-num" id="statUsers">0</div><div class="hero-stat-label">Участников</div></div>
-        </div>
     </div>
 </section>
 
@@ -457,8 +452,6 @@
                 <button class="filter-tag" onclick="filterByCategory('хвала', this)">Хвала</button>
                 <button class="filter-tag" onclick="filterByCategory('поклонение', this)">Поклонение</button>
                 <button class="filter-tag" onclick="filterByCategory('благодарение', this)">Благодарение</button>
-                <button class="filter-tag" onclick="filterByCategory('посвящение', this)">Посвящение</button>
-                <button class="filter-tag" onclick="filterByCategory('надежда', this)">Надежда</button>
             </div>
             <div class="results-count" id="resultsCount"></div>
         </div>
@@ -535,8 +528,6 @@
                         <option value="хвала">Хвала</option>
                         <option value="поклонение">Поклонение</option>
                         <option value="благодарение">Благодарение</option>
-                        <option value="посвящение">Посвящение</option>
-                        <option value="надежда">Надежда</option>
                     </select>
                     <textarea id="adminSongLyrics" class="form-input" rows="6" placeholder="Текст песни..."></textarea>
                     <button class="auth-btn" onclick="adminAddSong()" style="margin-top: 10px;">➕ Добавить песню</button>
@@ -593,8 +584,6 @@
                         <option value="хвала">Хвала</option>
                         <option value="поклонение">Поклонение</option>
                         <option value="благодарение">Благодарение</option>
-                        <option value="посвящение">Посвящение</option>
-                        <option value="надежда">Надежда</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -691,7 +680,6 @@
 
 <footer>
     <div class="footer-logo">Молодежь Церкви Живое Слово</div>
-    <p>© 2026 Молодежь церкви Живое Слово. Все песни принадлежат их авторам.</p>
     <div class="footer-verse">«Пойте Господу песнь новую; пойте Господу, вся земля» — Псалом 95:1</div>
 </footer>
 

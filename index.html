@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Валет — Христианская молодёжь</title>
+    <title>Молодежь церкви Живое Слово</title>
     <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.16/700.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -342,27 +342,62 @@
         .toast.info { background: var(--blue-accent); }
         @keyframes toastIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
         @keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
+        
+    
         @media (max-width: 768px) {
+            body { padding-bottom: 70px; }
             .header-inner { padding: 10px 16px; }
             .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--primary); flex-direction: column; padding: 12px; }
             .nav-links.open { display: flex; }
             .mobile-menu-btn { display: block; }
-            .hero h1 { font-size: 1.7rem; }
-            .hero-stats { gap: 20px; }
-            .controls-section { margin-top: -20px; }
-            .songs-grid { grid-template-columns: 1fr; }
+            .hero { padding: 40px 16px; }
+            .hero h1 { font-size: 1.5rem; margin-bottom: 10px; }
+            .hero p { font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; }
+            .hero-stats { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .hero-stat-num { font-size: 1.4rem; }
+            .hero-stat-label { font-size: 0.75rem; }
+            .controls-section { margin-top: -10px; }
+            .controls-card { padding: 16px; }
+            .search-row { gap: 8px; margin-bottom: 10px; }
+            .search-input { padding: 14px 16px 14px 44px; font-size: 1rem; }
+            .filter-tags { gap: 6px; }
+            .filter-tag { padding: 10px 18px; font-size: 0.9rem; }
+            .songs-grid { grid-template-columns: 1fr; gap: 16px; }
+            .song-card { min-height: 140px; }
+            .song-card:hover { transform: none; }
+            .song-card:active { transform: scale(0.98); }
+            .song-card-title { font-size: 1.1rem; }
+            .song-card-author { font-size: 0.9rem; }
+            .song-preview { font-size: 0.9rem; }
+            .song-open-btn { padding: 12px 24px; font-size: 1rem; }
+            .modal { max-width: 95vw; border-radius: 20px; }
+            .modal-header { padding: 20px; }
+            .modal-body { padding: 20px; }
+            .modal-title { font-size: 1.3rem; }
+            .modal-lyrics { font-size: 1rem; line-height: 1.8; }
+            .auth-modal { max-width: 95vw; }
+            .form-input { padding: 14px; font-size: 1rem; }
+            .auth-btn { padding: 14px 28px; font-size: 1rem; }
+            .chat-input-area .comment-input { padding: 14px; font-size: 1rem; }
+            .chat-send-btn { padding: 14px; }
             .pm-card { flex-direction: column; height: 70vh; }
             .pm-sidebar { width: 100%; max-height: 200px; }
+            .pm-dialog-item { padding: 16px; }
+            .profile-avatar-large { width: 90px; height: 90px; }
+            .profile-form { padding: 0 20px 28px; }
+            footer { padding: 24px 16px; }
+            .footer-logo { font-size: 1.1rem; }
+            .footer-verse { font-size: 0.82rem; }
         }
-    </style>
+</style>
 </head>
 <body>
 
 <div id="loader">
     <div class="loader-particles" id="particles"></div>
     <div class="loader-cross"></div>
-    <div class="loader-text">В<span>а</span>лет</div>
-    <div class="loader-subtitle">Христианская молодёжь</div>
+    <div class="loader-text">М<span>о</span>лоде<span>ж</span>ь Ц<span>е</span>р<span>к</span>ви <span>Ж</span><span>и</span>в<span>о</span>е <span>С</span>ло<span>в</span>о</div>
+    <div class="loader-subtitle">Церкви Живое Слово</div>
     <div class="loader-bar-container"><div class="loader-bar"></div></div>
 </div>
 
@@ -370,7 +405,7 @@
     <div class="header-inner">
         <a class="logo-area" href="#" onclick="scrollToTop()">
             <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#c9a84c" fill-opacity="0.15"/><rect x="14" y="4" width="12" height="32" rx="3" fill="#c9a84c"/><rect x="6" y="12" width="28" height="12" rx="3" fill="#c9a84c"/></svg>
-            <div class="logo-text">В<span>алет</span></div>
+            <div class="logo-text">Молодежь Церкви Живое Слово</div>
         </a>
         <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Меню">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -655,8 +690,8 @@
 </div>
 
 <footer>
-    <div class="footer-logo">В<span>алет</span></div>
-    <p>© 2026 Валет — Христианская молодёжь. Все песни принадлежат их авторам.</p>
+    <div class="footer-logo">Молодежь Церкви Живое Слово</div>
+    <p>© 2026 Молодежь церкви Живое Слово. Все песни принадлежат их авторам.</p>
     <div class="footer-verse">«Пойте Господу песнь новую; пойте Господу, вся земля» — Псалом 95:1</div>
 </footer>
 
@@ -1190,7 +1225,6 @@
         if (songs.length === 0) container.innerHTML = '<p>Нет песен</p>';
     }
 
-    // PM Functions
     async function renderPmDialogs() {
         if (!currentUser) {
             document.getElementById('pmLoginPrompt').style.display = 'block';
@@ -1203,40 +1237,13 @@
         const usersSnapshot = await db.collection('users').get();
         const users = usersSnapshot.docs.filter(doc => doc.id !== currentUser.uid).map(doc => ({ id: doc.id, ...doc.data() }));
         
-        const pmsSnapshot = await db.collection('privateMessages')
-            .where('participants', 'array-contains', currentUser.uid)
-            .orderBy('lastUpdated', 'desc')
-            .get();
-        
         const search = document.getElementById('pmSearchInput').value.toLowerCase();
         const filteredUsers = users.filter(u => (u.username || '').toLowerCase().includes(search));
         
         const dialogsContainer = document.getElementById('pmDialogs');
-        let html = '';
-        
-        if (pmsSnapshot.docs.length > 0) {
-            html += '<div style="padding:8px 16px;font-size:0.72rem;font-weight:700;color:var(--text-lighter);">Диалоги</div>';
-            for (const doc of pmsSnapshot.docs) {
-                const data = doc.data();
-                const otherId = data.participants.find(p => p !== currentUser.uid);
-                const otherUser = users.find(u => u.id === otherId);
-                if (otherUser) {
-                    const isActive = currentPmUser === otherId;
-                    html += `
-                        <div class="pm-dialog-item ${isActive ? 'active' : ''}" onclick="openPmChat('${otherId}')">
-                            <div class="pm-dialog-avatar">${renderAvatarHTML(otherId, otherUser.username || 'User', '42px')}</div>
-                            <div class="pm-dialog-info">
-                                <div class="pm-dialog-name">${escapeHtml(otherUser.username || 'User')}</div>
-                                <div class="pm-dialog-last">${data.lastMessage ? escapeHtml(data.lastMessage.substring(0, 40)) : ''}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-        }
+        let html = '<div style="padding:8px 16px;font-size:0.72rem;font-weight:700;color:var(--text-lighter);">Все участники</div>';
         
         if (filteredUsers.length > 0) {
-            html += '<div style="padding:8px 16px;font-size:0.72rem;font-weight:700;color:var(--text-lighter);margin-top:8px;">Участники</div>';
             filteredUsers.forEach(user => {
                 html += `
                     <div class="pm-dialog-item" onclick="openPmChat('${user.id}')">
@@ -1247,9 +1254,9 @@
                     </div>
                 `;
             });
+        } else {
+            html += '<div style="padding:20px;text-align:center;color:var(--text-lighter);">Нет участников</div>';
         }
-        
-        if (!html) html = '<div style="padding:20px;text-align:center;color:var(--text-lighter);">Нет участников</div>';
         dialogsContainer.innerHTML = html;
     }
 
@@ -1533,21 +1540,16 @@
         if (user) renderPmDialogs();
         else document.getElementById('pmLoginPrompt').style.display = 'block';
     });
-    
-    // Device detection: redirect mobile to mobile.html
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    if (isMobile && !sessionStorage.getItem('forceDesktop')) {
-        window.location.href = 'mobile.html';
-    }
-    
-    // Force desktop toggle
-    function forceDesktopToggle() {
-        sessionStorage.setItem('forceDesktop', 'true');
-        location.reload();
-    }
-    window.forceDesktopToggle = forceDesktopToggle;
-    
+
+
+
     setTimeout(() => document.getElementById('loader').classList.add('hidden'), 2000);
+
+
 </script>
+
+
 </body>
+
+
 </html>

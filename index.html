@@ -755,16 +755,7 @@
                 </div>
             </div>
             
-            <div style="margin-bottom:30px;">
-                <h3>📁 Управление папками (категориями)</h3>
-                <div style="display:flex;gap:8px;margin-bottom:15px;">
-                    <input type="text" id="newCategoryName" class="form-input" placeholder="Название новой папки..." style="flex:1;">
-                    <button class="form-btn primary" onclick="addCategory()" style="white-space:nowrap;">➕ Создать</button>
-                </div>
-                <div id="categoriesList">
-                    <p style="text-align:center;color:var(--text-lighter);">Загрузка категорий...</p>
-                </div>
-            </div>
+
             
             <div>
                 <h3>🎵 Управление песнями</h3>
@@ -810,7 +801,6 @@
             </div>
         </div>
         <div class="comments-section">
-            <h4 style="margin-bottom:12px;">💬 Комментарии (<span id="commentCount">0</span>)</h4>
             <div class="comments-list" id="commentsList"></div>
             <div id="commentFormArea"></div>
         </div>
@@ -895,7 +885,7 @@
 
 <footer>
     <div class="footer-logo">Молодежь Церкви <span>Живое Слово</span></div>
-    <p>© 2026. Все песни принадлежат их авторам.</p>
+
 </footer>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -926,7 +916,7 @@
     let currentSearch = '';
     let currentSort = 'title-asc';
     let currentPmUser = null;
-    let categories = ["хвала", "поклонение", "благодарение", "посвящение", "надежда"];
+    let categories = ["хвала", ];
     
     // ===== UTILS =====
     function showToast(msg, type) {

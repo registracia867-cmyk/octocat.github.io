@@ -852,8 +852,6 @@
                         <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </div>
                 </div>
-                <p style="font-size:0.85rem;color:var(--text-light);">Нажмите, чтобы изменить фото</p>
-                <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
             </div>
             <div class="form-group"><label class="form-label">Имя пользователя</label><input type="text" class="form-input" id="profileName" placeholder="Ваше имя"></div>
             <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="profileEmail" disabled style="opacity:0.7;"></div>
@@ -908,7 +906,7 @@
     const storage = firebase.storage();
     
     // ===== STATE =====
-    const ADMIN_EMAILS = ["ilya@example.com", "dina@example.com", "nikita@example.com"];
+    const ADMIN_EMAILS = ["ilha.gukshenko@yandex.ru", "dinaprotsyuk@list.ru", "bity69361@gmail.com"];
     let currentUser = null;
     let isAdmin = false;
     let currentSongId = null;
@@ -916,7 +914,7 @@
     let currentSearch = '';
     let currentSort = 'title-asc';
     let currentPmUser = null;
-    let categories = ["хвала", ];
+    let categories = ["Рождество","Пасха","Жатва","Троица","Свадьба","Семейные","Новый год","Прочее" ];
     
     // ===== UTILS =====
     function showToast(msg, type) {

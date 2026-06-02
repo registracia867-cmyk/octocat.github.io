@@ -39,6 +39,28 @@
         }
         .hidden { display: none !important; }
 
+        /* OFFLINE INDICATOR */
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #c0392b;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+        .offline-indicator.show {
+            transform: translateY(0);
+        }
+        .offline-indicator.online {
+            background: #4a8c5c;
+        }
+
         /* LOADER */
         #loader { 
             position: fixed; inset: 0; z-index: 10000; 
@@ -99,11 +121,7 @@
         }
         .logo-text span { color: var(--gold); }
         
-        /* Desktop nav - visible only on desktop */
-        .nav-desktop { 
-            display: none; 
-            gap: 4px; align-items: center; 
-        }
+        .nav-desktop { display: none; gap: 4px; align-items: center; }
         .nav-link { 
             color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.85rem; 
             padding: 8px 16px; border-radius: 10px; transition: var(--transition); 
@@ -111,17 +129,9 @@
             white-space: nowrap; font-weight: 500;
         }
         .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
-        .nav-link.active { 
-            background: var(--gold); color: var(--primary); font-weight: 600; 
-        }
+        .nav-link.active { background: var(--gold); color: var(--primary); font-weight: 600; }
         
-        /* Mobile menu button - hidden by default, shown on mobile */
-        .mobile-menu-btn { 
-            display: none; 
-            background: none; border: none; cursor: pointer; 
-            padding: 8px; min-width: 44px; min-height: 44px; 
-            align-items: center; justify-content: center; 
-        }
+        .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
         .mobile-menu-btn svg { width: 24px; height: 24px; stroke: #fff; }
         
         .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -548,21 +558,11 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* ===== RESPONSIVE ===== */
-        
-        /* Mobile (default): bottom nav only, no menu in header */
-        .nav-desktop { display: none; }
-        .mobile-menu-btn { display: none; }
-        .bottom-nav { display: flex; }
-        body { padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom)); }
-
-        /* Tablet */
+        /* RESPONSIVE */
         @media (min-width: 481px) {
             .songs-grid { grid-template-columns: 1fr 1fr; }
             .hero h1 { font-size: 1.8rem; }
         }
-
-        /* Desktop: show nav in header, hide bottom nav */
         @media (min-width: 769px) {
             body { padding-bottom: 0; }
             .header-inner { padding: 10px 24px; }
@@ -578,8 +578,6 @@
             .hero { padding: 50px 24px; }
             .hero h1 { font-size: 2rem; }
         }
-
-        /* Large desktop */
         @media (min-width: 1025px) {
             .header-inner { max-width: 1024px; }
             .controls-section, .songs-section { max-width: 1024px; }
@@ -589,32 +587,35 @@
         }
 
         .auth-tab-btn {
-    flex: 1;
-    padding: 14px;
-    text-align: center;
-    font-weight: 600;
-    border: none;
-    background: none;
-    cursor: pointer;
-    color: var(--text-lighter);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: var(--transition);
-    font-family: inherit;
-    font-size: 0.9rem;
-}
-
-.auth-tab-btn.active {
-    color: var(--gold-dark);
-    border-bottom: 2px solid var(--gold);
-}
-
-.auth-tab-btn:hover {
-    color: var(--gold-dark);
-}
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            font-weight: 600;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--text-lighter);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: var(--transition);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        .auth-tab-btn.active {
+            color: var(--gold-dark);
+            border-bottom: 2px solid var(--gold);
+        }
+        .auth-tab-btn:hover {
+            color: var(--gold-dark);
+        }
     </style>
 </head>
 <body>
+
+<!-- OFFLINE INDICATOR -->
+<div class="offline-indicator" id="offlineIndicator">
+    🔌 Нет соединения с интернетом. Песни доступны офлайн.
+</div>
 
 <!-- LOADER -->
 <div id="loader">
@@ -624,7 +625,7 @@
     <div class="loader-bar-container"><div class="loader-bar"></div></div>
 </div>
 
-<!-- HEADER (без меню навигации на мобильных) -->
+<!-- HEADER -->
 <header>
     <div class="header-inner">
         <div class="logo-area" onclick="scrollToTop()" style="cursor:pointer;">
@@ -632,7 +633,6 @@
             <div class="logo-text">Живое Слово</div>
         </div>
         
-        <!-- Навигация ТОЛЬКО для десктопа -->
         <nav class="nav-desktop" id="navDesktop">
             <button class="nav-link active" onclick="switchPage('songs', this)">Песни</button>
             <button class="nav-link" onclick="switchPage('chat', this)">Чат</button>
@@ -755,8 +755,6 @@
                 </div>
             </div>
             
-
-            
             <div>
                 <h3>🎵 Управление песнями</h3>
                 <div id="adminSongsList">
@@ -861,7 +859,7 @@
     </div>
 </div>
 
-<!-- BOTTOM NAV (основная навигация на мобильных) -->
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav" id="bottomNav">
     <button class="bottom-nav-item active" onclick="switchPage('songs', this)" data-page="songs">
         <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -883,10 +881,11 @@
 
 <footer>
     <div class="footer-logo">Молодежь Церкви <span>Живое Слово</span></div>
-
 </footer>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
 
 <script>
     // ===== FIREBASE =====
@@ -905,6 +904,16 @@
     const auth = firebase.auth();
     const storage = firebase.storage();
     
+    // Enable offline persistence for Firestore
+    db.enablePersistence({ synchronizeTabs: true })
+        .catch(err => {
+            if (err.code === 'failed-precondition') {
+                console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+            } else if (err.code === 'unimplemented') {
+                console.log('The current browser does not support all of the features required to enable persistence');
+            }
+        });
+    
     // ===== STATE =====
     const ADMIN_EMAILS = ["kpprevkponaog@gmail.com", "dinaprotsyuk@list.ru", "n@gmail.com"];
     let currentUser = null;
@@ -915,6 +924,84 @@
     let currentSort = 'title-asc';
     let currentPmUser = null;
     let categories = ["Рождество","Пасха","Жатва","Троица","Свадьба","Семейные","Новый год","Прочее" ];
+    let isOnline = navigator.onLine;
+    let localSongsCache = []; // Cache for offline songs
+    
+    // ===== OFFLINE HANDLING =====
+    function updateOfflineStatus() {
+        const indicator = document.getElementById('offlineIndicator');
+        if (!navigator.onLine) {
+            indicator.classList.add('show');
+            indicator.classList.remove('online');
+            showToast('Офлайн-режим: доступны сохранённые песни', 'info');
+        } else {
+            indicator.classList.add('show');
+            indicator.classList.add('online');
+            indicator.textContent = '✅ Интернет восстановлен. Данные синхронизируются.';
+            setTimeout(() => {
+                indicator.classList.remove('show');
+                indicator.textContent = '🔌 Нет соединения с интернетом. Песни доступны офлайн.';
+                indicator.classList.remove('online');
+            }, 3000);
+            // Refresh data when back online
+            if (document.getElementById('page-songs').classList.contains('active')) {
+                loadSongs();
+            }
+            if (document.getElementById('page-chat').classList.contains('active')) {
+                initChat();
+            }
+        }
+    }
+    
+    window.addEventListener('online', updateOfflineStatus);
+    window.addEventListener('offline', updateOfflineStatus);
+    
+    // Save songs to localStorage for offline access
+    async function cacheSongsLocally() {
+        try {
+            const snap = await db.collection('songs').get();
+            const songs = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            localStorage.setItem('cached_songs', JSON.stringify(songs));
+            localSongsCache = songs;
+            console.log('Songs cached locally:', songs.length);
+            return songs;
+        } catch(e) {
+            console.log('Failed to cache songs, using existing cache');
+            const cached = localStorage.getItem('cached_songs');
+            if (cached) {
+                localSongsCache = JSON.parse(cached);
+                return localSongsCache;
+            }
+            return [];
+        }
+    }
+    
+    function getCachedSongs() {
+        const cached = localStorage.getItem('cached_songs');
+        if (cached) {
+            localSongsCache = JSON.parse(cached);
+            return localSongsCache;
+        }
+        return [];
+    }
+    
+    // Cache categories
+    async function cacheCategoriesLocally() {
+        try {
+            const doc = await db.collection('settings').doc('categories').get();
+            if (doc.exists && doc.data().list) {
+                categories = doc.data().list;
+                localStorage.setItem('cached_categories', JSON.stringify(categories));
+            }
+        } catch(e) {
+            const cached = localStorage.getItem('cached_categories');
+            if (cached) {
+                categories = JSON.parse(cached);
+            }
+        }
+        updateFilterTags();
+        updateCategorySelects();
+    }
     
     // ===== UTILS =====
     function showToast(msg, type) {
@@ -984,7 +1071,12 @@
             } else {
                 await db.collection('settings').doc('categories').set({list: categories});
             }
-        } catch(e) { console.error('Error:', e); }
+            localStorage.setItem('cached_categories', JSON.stringify(categories));
+        } catch(e) {
+            console.log('Offline mode: using cached categories');
+            const cached = localStorage.getItem('cached_categories');
+            if (cached) categories = JSON.parse(cached);
+        }
         updateFilterTags();
         updateCategorySelects();
     }
@@ -992,6 +1084,7 @@
     async function saveCategories() {
         try {
             await db.collection('settings').doc('categories').set({list: categories});
+            localStorage.setItem('cached_categories', JSON.stringify(categories));
         } catch(e) { console.error('Error:', e); }
     }
     
@@ -1016,11 +1109,9 @@
         const pageEl = document.getElementById('page-' + page);
         if (pageEl) pageEl.classList.add('active');
         
-        // Update desktop nav
         document.querySelectorAll('.nav-desktop .nav-link').forEach(l => l.classList.remove('active'));
         if (btn && btn.classList.contains('nav-link')) btn.classList.add('active');
         
-        // Update bottom nav
         document.querySelectorAll('.bottom-nav-item').forEach(item => {
             item.classList.remove('active');
             if (item.getAttribute('data-page') === page) item.classList.add('active');
@@ -1029,15 +1120,14 @@
         document.getElementById('heroSection').style.display = (page === 'songs') ? '' : 'none';
         window.scrollTo(0, 0);
         
-        if (page === 'songs') loadSongs();
-        if (page === 'chat') initChat();
+        if (page === 'songs') renderSongs();
+        if (page === 'chat' && navigator.onLine) initChat();
         if (page === 'pm') initPm();
         if (page === 'admin' && isAdmin) { loadAdminData(); loadCategoriesList(); }
     }
     
     function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
     
-    // Close dropdown on outside click
     document.addEventListener('click', function(e) {
         const dd = document.getElementById('userDropdown');
         if (dd && dd.classList.contains('show') && !e.target.closest('.user-badge')) {
@@ -1045,96 +1135,130 @@
         }
     }); 
     
-    // ===== SONGS =====
+    // ===== SONGS with OFFLINE SUPPORT =====
     async function loadSongs() {
-        try {
-            const snap = await db.collection('songs').get();
-            if (snap.empty) {
-                const initial = [
-                    {id:"song_1",title:"Ты — мой Бог",author:"Даниил",category:"поклонение",date:"2025-09-15",preview:"Ты мой Бог, и я прославляю Тебя...",lyrics:"Ты мой Бог, и я прославляю Тебя...\n\nПрипев:\nТы мой Бог, и я прославляю Тебя,\nТы мой Царь, и я поклоняюсь Тебе."},
-                    {id:"song_2",title:"Свят, свят, свят",author:"Молодёжная группа «Свет»",category:"хвала",date:"2025-08-20",preview:"Свят, свят, свят Господь Вседержитель...",lyrics:"Свят, свят, свят — Господь Вседержитель...\n\nПрипев:\nСвят, свят, свят — Господь Вседержитель,\nСвят, свят, свят — наш Небесный Отец."},
-                    {id:"song_3",title:"Благодарю Тебя, Господь",author:"Анна К.",category:"благодарение",date:"2025-11-02",preview:"Благодарю Тебя за каждый день...",lyrics:"Благодарю Тебя, Господь,\nЗа каждый день, за каждый миг."},
-                    {id:"song_4",title:"Я посвящаю себя Тебе",author:"Группа «Новая Жизнь»",category:"посвящение",date:"2025-07-10",preview:"Возьми мою жизнь...",lyrics:"Я посвящаю себя Тебе, Господь,\nВозьми мою жизнь, я отдаю её Тебе."},
-                    {id:"song_5",title:"Надежда жива",author:"Марк и Елизавета",category:"надежда",date:"2025-10-28",preview:"Даже когда всё рушится — надежда жива...",lyrics:"Надежда жива, надежда жива!\nХристос воскрес — и смерть побеждена."}
-                ];
-                for (const s of initial) await db.collection('songs').doc(s.id).set(s);
+        if (navigator.onLine) {
+            try {
+                const snap = await db.collection('songs').get();
+                if (snap.empty) {
+                    const initial = [
+                        {id:"song_1",title:"Ты — мой Бог",author:"Даниил",category:"поклонение",date:"2025-09-15",preview:"Ты мой Бог, и я прославляю Тебя...",lyrics:"Ты мой Бог, и я прославляю Тебя...\n\nПрипев:\nТы мой Бог, и я прославляю Тебя,\nТы мой Царь, и я поклоняюсь Тебе."},
+                        {id:"song_2",title:"Свят, свят, свят",author:"Молодёжная группа «Свет»",category:"хвала",date:"2025-08-20",preview:"Свят, свят, свят Господь Вседержитель...",lyrics:"Свят, свят, свят — Господь Вседержитель...\n\nПрипев:\nСвят, свят, свят — Господь Вседержитель,\nСвят, свят, свят — наш Небесный Отец."},
+                        {id:"song_3",title:"Благодарю Тебя, Господь",author:"Анна К.",category:"благодарение",date:"2025-11-02",preview:"Благодарю Тебя за каждый день...",lyrics:"Благодарю Тебя, Господь,\nЗа каждый день, за каждый миг."},
+                        {id:"song_4",title:"Я посвящаю себя Тебе",author:"Группа «Новая Жизнь»",category:"посвящение",date:"2025-07-10",preview:"Возьми мою жизнь...",lyrics:"Я посвящаю себя Тебе, Господь,\nВозьми мою жизнь, я отдаю её Тебе."},
+                        {id:"song_5",title:"Надежда жива",author:"Марк и Елизавета",category:"надежда",date:"2025-10-28",preview:"Даже когда всё рушится — надежда жива...",lyrics:"Надежда жива, надежда жива!\nХристос воскрес — и смерть побеждена."}
+                    ];
+                    for (const s of initial) await db.collection('songs').doc(s.id).set(s);
+                }
+                await cacheSongsLocally();
+                renderSongs();
+            } catch(e) { 
+                console.error('Error loading from network:', e);
+                renderSongs(true); // Use cache
             }
-            renderSongs();
-        } catch(e) { console.error('Error:', e); }
+        } else {
+            renderSongs(true); // Use cache when offline
+        }
     }
     
-    async function renderSongs() {
-        try {
-            let query = db.collection('songs');
-            if (currentFilter !== 'all') query = query.where('category', '==', currentFilter);
-            
-            const snap = await query.get();
-            let songs = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            
-            if (currentSearch) {
-                const s = currentSearch.toLowerCase();
-                songs = songs.filter(x => (x.title||'').toLowerCase().includes(s) || (x.author||'').toLowerCase().includes(s));
+    async function renderSongs(useCache = false) {
+        let songs = [];
+        
+        if (useCache || !navigator.onLine) {
+            songs = getCachedSongs();
+            if (songs.length === 0) {
+                document.getElementById('songsGrid').innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-lighter);">Нет сохранённых песен. Подключитесь к интернету для загрузки.</p>';
+                document.getElementById('resultsCount').innerHTML = 'Нет песен офлайн';
+                return;
             }
-            
-            const [key, dir] = currentSort.split('-');
-            songs.sort((a,b) => {
-                let va, vb;
-                if (key === 'title') { va = (a.title||'').toLowerCase(); vb = (b.title||'').toLowerCase(); }
-                else if (key === 'author') { va = (a.author||'').toLowerCase(); vb = (b.author||'').toLowerCase(); }
-                else { va = new Date(a.date||0); vb = new Date(b.date||0); }
-                return (va < vb ? -1 : 1) * (dir === 'asc' ? 1 : -1);
-            });
-            
-            const grid = document.getElementById('songsGrid');
-            grid.innerHTML = songs.length === 0 ? '<p style="text-align:center;padding:40px;grid-column:1/-1;">Песни не найдены</p>' :
-                songs.map(s => `
-                    <div class="song-card">
-                        ${isAdmin ? `<div class="admin-actions">
-                            <button class="admin-btn edit" onclick="event.stopPropagation();openSongModal('${s.id}');setTimeout(showEditForm,300);">✏️</button>
-                            <button class="admin-btn delete" onclick="event.stopPropagation();deleteSong('${s.id}')">🗑️</button>
-                        </div>` : ''}
-                        <div class="song-card-header" onclick="openSongModal('${s.id}')">
-                            <div class="song-category-badge">${escHtml(s.category||'')}</div>
-                            <div class="song-card-title">${escHtml(s.title||'')}</div>
-                            <div class="song-card-author">${escHtml(s.author||'')}</div>
-                        </div>
-                        <div class="song-card-body" onclick="openSongModal('${s.id}')">
-                            <div class="song-preview">${escHtml(s.preview||(s.lyrics||'').substring(0,100))}</div>
-                        </div>
-                        <div class="song-card-footer">
-                            <span class="song-date">${s.date||''}</span>
-                            <button class="song-open-btn" onclick="event.stopPropagation();openSongModal('${s.id}')">Открыть</button>
-                        </div>
+        } else {
+            try {
+                let query = db.collection('songs');
+                if (currentFilter !== 'all') query = query.where('category', '==', currentFilter);
+                const snap = await query.get();
+                songs = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                await cacheSongsLocally();
+            } catch(e) {
+                console.error('Error:', e);
+                songs = getCachedSongs();
+            }
+        }
+        
+        if (currentSearch) {
+            const s = currentSearch.toLowerCase();
+            songs = songs.filter(x => (x.title||'').toLowerCase().includes(s) || (x.author||'').toLowerCase().includes(s));
+        }
+        
+        const [key, dir] = currentSort.split('-');
+        songs.sort((a,b) => {
+            let va, vb;
+            if (key === 'title') { va = (a.title||'').toLowerCase(); vb = (b.title||'').toLowerCase(); }
+            else if (key === 'author') { va = (a.author||'').toLowerCase(); vb = (b.author||'').toLowerCase(); }
+            else { va = new Date(a.date||0); vb = new Date(b.date||0); }
+            return (va < vb ? -1 : 1) * (dir === 'asc' ? 1 : -1);
+        });
+        
+        const grid = document.getElementById('songsGrid');
+        grid.innerHTML = songs.length === 0 ? '<p style="text-align:center;padding:40px;grid-column:1/-1;">Песни не найдены</p>' :
+            songs.map(s => `
+                <div class="song-card">
+                    ${isAdmin ? `<div class="admin-actions">
+                        <button class="admin-btn edit" onclick="event.stopPropagation();openSongModal('${s.id}');setTimeout(showEditForm,300);">✏️</button>
+                        <button class="admin-btn delete" onclick="event.stopPropagation();deleteSong('${s.id}')">🗑️</button>
+                    </div>` : ''}
+                    <div class="song-card-header" onclick="openSongModal('${s.id}')">
+                        <div class="song-category-badge">${escHtml(s.category||'')}</div>
+                        <div class="song-card-title">${escHtml(s.title||'')}</div>
+                        <div class="song-card-author">${escHtml(s.author||'')}</div>
                     </div>
-                `).join('');
-            
-            document.getElementById('resultsCount').innerHTML = 'Найдено <strong>' + songs.length + '</strong> песен';
-            document.getElementById('statSongs').textContent = songs.length;
-            document.getElementById('statCategories').textContent = categories.length;
-        } catch(e) { console.error('Error:', e); }
+                    <div class="song-card-body" onclick="openSongModal('${s.id}')">
+                        <div class="song-preview">${escHtml(s.preview||(s.lyrics||'').substring(0,100))}</div>
+                    </div>
+                    <div class="song-card-footer">
+                        <span class="song-date">${s.date||''}</span>
+                        <button class="song-open-btn" onclick="event.stopPropagation();openSongModal('${s.id}')">Открыть</button>
+                    </div>
+                </div>
+            `).join('');
+        
+        document.getElementById('resultsCount').innerHTML = 'Найдено <strong>' + songs.length + '</strong> песен';
+        document.getElementById('statSongs').textContent = songs.length;
+        document.getElementById('statCategories').textContent = categories.length;
     }
     
     async function openSongModal(songId) {
-        try {
-            const doc = await db.collection('songs').doc(songId).get();
-            if (!doc.exists) { showToast('Песня не найдена', 'error'); return; }
-            
-            const song = doc.data();
-            currentSongId = songId;
-            
-            document.getElementById('modalCategory').textContent = song.category || '';
-            document.getElementById('modalTitle').textContent = song.title || '';
-            document.getElementById('modalAuthor').textContent = song.author || '';
-            document.getElementById('modalLyrics').innerHTML = (song.lyrics||'').replace(/\n/g, '<br>');
-            
-            document.getElementById('editFormContainer').classList.remove('active');
-            document.getElementById('adminModalButtons').style.display = isAdmin ? 'flex' : 'none';
-            
-            await loadComments(songId);
-            
-            document.getElementById('songModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        } catch(e) { console.error('Error:', e); }
+        // Try to get from cache first
+        let song = null;
+        const cached = getCachedSongs();
+        song = cached.find(s => s.id === songId);
+        
+        if (!song && navigator.onLine) {
+            try {
+                const doc = await db.collection('songs').doc(songId).get();
+                if (doc.exists) song = doc.data();
+            } catch(e) { console.error('Error:', e); }
+        }
+        
+        if (!song) {
+            showToast('Песня не найдена', 'error');
+            return;
+        }
+        
+        currentSongId = songId;
+        
+        document.getElementById('modalCategory').textContent = song.category || '';
+        document.getElementById('modalTitle').textContent = song.title || '';
+        document.getElementById('modalAuthor').textContent = song.author || '';
+        document.getElementById('modalLyrics').innerHTML = (song.lyrics||'').replace(/\n/g, '<br>');
+        
+        document.getElementById('editFormContainer').classList.remove('active');
+        document.getElementById('adminModalButtons').style.display = isAdmin ? 'flex' : 'none';
+        
+        if (navigator.onLine) await loadComments(songId);
+        else document.getElementById('commentsList').innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-lighter);">Комментарии доступны онлайн</p>';
+        
+        document.getElementById('songModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
     }
     
     async function loadComments(songId) {
@@ -1142,7 +1266,6 @@
             const snap = await db.collection('comments').where('songId','==',songId).orderBy('timestamp','desc').get();
             const comments = snap.docs.map(d => ({id:d.id,...d.data()}));
             
-            document.getElementById('commentCount').textContent = comments.length;
             const list = document.getElementById('commentsList');
             list.innerHTML = comments.length === 0 ? '<p style="text-align:center;padding:16px;color:var(--text-lighter);">Нет комментариев</p>' :
                 comments.map(c => `
@@ -1165,6 +1288,10 @@
     }
     
     async function submitComment() {
+        if (!navigator.onLine) {
+            showToast('Комментарии доступны только онлайн', 'error');
+            return;
+        }
         const input = document.getElementById('commentInput');
         if (!input || !currentUser || !currentSongId) return;
         const text = input.value.trim();
@@ -1192,6 +1319,10 @@
     function cancelEditSong() { document.getElementById('editFormContainer').classList.remove('active'); }
     
     async function saveEditSong() {
+        if (!navigator.onLine) {
+            showToast('Редактирование доступно только онлайн', 'error');
+            return;
+        }
         const title = document.getElementById('editTitle').value.trim();
         const author = document.getElementById('editAuthor').value.trim();
         const category = document.getElementById('editCategory').value;
@@ -1205,6 +1336,7 @@
             document.getElementById('modalLyrics').innerHTML = lyrics.replace(/\n/g,'<br>');
             document.getElementById('editFormContainer').classList.remove('active');
             showToast('Обновлено!','success');
+            await cacheSongsLocally();
             renderSongs();
         } catch(e) { showToast('Ошибка','error'); }
     }
@@ -1212,11 +1344,16 @@
     async function deleteCurrentSong() { if (confirm('Удалить?')) { await deleteSong(currentSongId); closeSongModal(); } }
     
     async function deleteSong(id) {
+        if (!navigator.onLine) {
+            showToast('Удаление доступно только онлайн', 'error');
+            return;
+        }
         try {
             await db.collection('songs').doc(id).delete();
             const snap = await db.collection('comments').where('songId','==',id).get();
             for (const d of snap.docs) await d.ref.delete();
             showToast('Удалено','success');
+            await cacheSongsLocally();
             renderSongs();
             if (isAdmin) loadAdminData();
         } catch(e) { showToast('Ошибка','error'); }
@@ -1239,48 +1376,52 @@
     function handleSort() { currentSort = document.getElementById('sortSelect').value; renderSongs(); }
     
     // ===== ADMIN =====
-async function addSong() {
-    const title = document.getElementById('adminTitle').value.trim();
-    const author = document.getElementById('adminAuthor').value.trim();
-    const category = document.getElementById('adminCategory').value;
-    const lyrics = document.getElementById('adminLyrics').value.trim();
-    
-    if (!title || !author || !category || !lyrics) { 
-        showToast('Заполните все поля', 'error'); 
-        return; 
-    }
-    
-    // Проверяем, существует ли категория
-    if (!categories.includes(category)) {
-        showToast('Выберите существующую категорию', 'error');
-        return;
-    }
-    
-    try {
-        const id = 'song_' + Date.now();
-        await db.collection('songs').doc(id).set({
-            id: id,
-            title: title,
-            author: author,
-            category: category,
-            date: new Date().toISOString().split('T')[0],
-            preview: lyrics.substring(0, 100),
-            lyrics: lyrics
-        });
+    async function addSong() {
+        if (!navigator.onLine) {
+            showToast('Добавление песен доступно только онлайн', 'error');
+            return;
+        }
+        const title = document.getElementById('adminTitle').value.trim();
+        const author = document.getElementById('adminAuthor').value.trim();
+        const category = document.getElementById('adminCategory').value;
+        const lyrics = document.getElementById('adminLyrics').value.trim();
         
-        document.getElementById('adminTitle').value = '';
-        document.getElementById('adminAuthor').value = '';
-        document.getElementById('adminLyrics').value = '';
-        document.getElementById('adminCategory').value = '';
+        if (!title || !author || !category || !lyrics) { 
+            showToast('Заполните все поля', 'error'); 
+            return; 
+        }
         
-        showToast('Песня добавлена!', 'success');
-        loadAdminData();
-        renderSongs();
-    } catch(e) { 
-        console.error('Error:', e);
-        showToast('Ошибка при добавлении: ' + e.message, 'error'); 
+        if (!categories.includes(category)) {
+            showToast('Выберите существующую категорию', 'error');
+            return;
+        }
+        
+        try {
+            const id = 'song_' + Date.now();
+            await db.collection('songs').doc(id).set({
+                id: id,
+                title: title,
+                author: author,
+                category: category,
+                date: new Date().toISOString().split('T')[0],
+                preview: lyrics.substring(0, 100),
+                lyrics: lyrics
+            });
+            
+            document.getElementById('adminTitle').value = '';
+            document.getElementById('adminAuthor').value = '';
+            document.getElementById('adminLyrics').value = '';
+            document.getElementById('adminCategory').value = '';
+            
+            showToast('Песня добавлена!', 'success');
+            await cacheSongsLocally();
+            loadAdminData();
+            renderSongs();
+        } catch(e) { 
+            console.error('Error:', e);
+            showToast('Ошибка при добавлении: ' + e.message, 'error'); 
+        }
     }
-}
     
     async function loadAdminData() {
         try {
@@ -1315,132 +1456,115 @@ async function addSong() {
             `).join('');
     }
     
-async function addCategory() {
-    const name = document.getElementById('newCategoryName').value.trim().toLowerCase();
-    if (!name) { 
-        showToast('Введите название', 'error'); 
-        return; 
-    }
-    if (categories.includes(name)) { 
-        showToast('Категория уже существует', 'error'); 
-        return; 
-    }
-    
-    try {
-        categories.push(name);
-        await saveCategories();
+    async function addCategory() {
+        const name = document.getElementById('newCategoryName').value.trim().toLowerCase();
+        if (!name) { 
+            showToast('Введите название', 'error'); 
+            return; 
+        }
+        if (categories.includes(name)) { 
+            showToast('Категория уже существует', 'error'); 
+            return; 
+        }
         
-        updateFilterTags();
-        updateCategorySelects();
-        loadCategoriesList();
-        document.getElementById('newCategoryName').value = '';
-        document.getElementById('statCategories').textContent = categories.length;
-        
-        showToast('Категория "' + name + '" добавлена!', 'success');
-    } catch(e) {
-        console.error('Error:', e);
-        showToast('Ошибка при добавлении категории', 'error');
+        try {
+            categories.push(name);
+            await saveCategories();
+            
+            updateFilterTags();
+            updateCategorySelects();
+            loadCategoriesList();
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('statCategories').textContent = categories.length;
+            
+            showToast('Категория "' + name + '" добавлена!', 'success');
+        } catch(e) {
+            console.error('Error:', e);
+            showToast('Ошибка при добавлении категории', 'error');
+        }
     }
-}
     
     function showEditCategory(i) { document.getElementById('cat-edit-'+i).classList.add('active'); }
     function hideEditCategory(i) { document.getElementById('cat-edit-'+i).classList.remove('active'); }
-async function saveEditCategory(i) {
-    const nameInput = document.getElementById('cat-edit-input-' + i);
-    if (!nameInput) return;
     
-    const name = nameInput.value.trim().toLowerCase();
-    if (!name) { 
-        showToast('Введите название', 'error'); 
-        return; 
-    }
-    if (categories.includes(name) && categories[i] !== name) { 
-        showToast('Категория уже существует', 'error'); 
-        return; 
-    }
-    
-    const oldName = categories[i];
-    
-    try {
-        // Обновляем категорию в массиве
-        categories[i] = name;
+    async function saveEditCategory(i) {
+        const nameInput = document.getElementById('cat-edit-input-' + i);
+        if (!nameInput) return;
         
-        // Обновляем все песни с этой категорией
-        const batch = db.batch();
-        const snap = await db.collection('songs').where('category', '==', oldName).get();
-        
-        if (!snap.empty) {
-            snap.docs.forEach(doc => {
-                batch.update(doc.ref, { category: name });
-            });
-            await batch.commit();
-            console.log(`Updated ${snap.size} songs from "${oldName}" to "${name}"`);
+        const name = nameInput.value.trim().toLowerCase();
+        if (!name) { 
+            showToast('Введите название', 'error'); 
+            return; 
+        }
+        if (categories.includes(name) && categories[i] !== name) { 
+            showToast('Категория уже существует', 'error'); 
+            return; 
         }
         
-        await saveCategories();
-        updateFilterTags();
-        updateCategorySelects();
-        loadCategoriesList();
-        hideEditCategory(i);
-        renderSongs();
+        const oldName = categories[i];
         
-        showToast('Категория обновлена!', 'success');
-    } catch(e) { 
-        console.error('Error:', e);
-        showToast('Ошибка при обновлении категории', 'error');
+        try {
+            categories[i] = name;
+            
+            if (navigator.onLine) {
+                const batch = db.batch();
+                const snap = await db.collection('songs').where('category', '==', oldName).get();
+                if (!snap.empty) {
+                    snap.docs.forEach(doc => {
+                        batch.update(doc.ref, { category: name });
+                    });
+                    await batch.commit();
+                }
+            }
+            
+            await saveCategories();
+            updateFilterTags();
+            updateCategorySelects();
+            loadCategoriesList();
+            hideEditCategory(i);
+            await cacheSongsLocally();
+            renderSongs();
+            
+            showToast('Категория обновлена!', 'success');
+        } catch(e) { 
+            console.error('Error:', e);
+            showToast('Ошибка при обновлении категории', 'error');
+        }
     }
-}
     
     async function deleteCategory(i) {
         const cat = categories[i];
         if (!confirm(`Удалить "${cat}"?`)) return;
         try {
-            const snap = await db.collection('songs').where('category','==',cat).get();
-            for (const d of snap.docs) await d.ref.update({category: ''});
+            if (navigator.onLine) {
+                const snap = await db.collection('songs').where('category','==',cat).get();
+                for (const d of snap.docs) await d.ref.update({category: ''});
+            }
+            categories.splice(i, 1);
+            await saveCategories();
+            updateFilterTags();
+            updateCategorySelects();
+            loadCategoriesList();
+            await cacheSongsLocally();
+            renderSongs();
+            document.getElementById('statCategories').textContent = categories.length;
+            showToast('Удалено','success');
         } catch(e) { console.error('Error:', e); }
-        categories.splice(i, 1);
-        await saveCategories();
-        updateFilterTags();
-        updateCategorySelects();
-        loadCategoriesList();
-        renderSongs();
-        document.getElementById('statCategories').textContent = categories.length;
-        showToast('Удалено','success');
     }
+    
     async function saveCategories() {
-    try {
-        await db.collection('settings').doc('categories').set({
-            list: categories,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        
-        console.log('Categories saved successfully:', categories);
-    } catch(e) { 
-        console.error('Error saving categories:', e);
-        showToast('Ошибка сохранения категорий', 'error');
+        try {
+            await db.collection('settings').doc('categories').set({
+                list: categories,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            localStorage.setItem('cached_categories', JSON.stringify(categories));
+            console.log('Categories saved successfully:', categories);
+        } catch(e) { 
+            console.error('Error saving categories:', e);
+            localStorage.setItem('cached_categories', JSON.stringify(categories));
+        }
     }
-}
-// Временная функция для проверки данных в Firebase
-async function debugFirebaseData() {
-    try {
-        // Проверяем категории
-        const catDoc = await db.collection('settings').doc('categories').get();
-        console.log('Categories in Firebase:', catDoc.exists ? catDoc.data() : 'Not found');
-        
-        // Проверяем песни
-        const songsSnap = await db.collection('songs').get();
-        const songs = songsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        console.log('Songs in Firebase:', songs);
-        
-        // Показываем текущие категории в приложении
-        console.log('Categories in app:', categories);
-    } catch(e) {
-        console.error('Debug error:', e);
-    }
-}
-
-// Вызовите эту функцию из консоли браузера для проверки:
-// debugFirebaseData()
     
     // ===== PROFILE =====
     function openProfileModal() {
@@ -1471,6 +1595,10 @@ async function debugFirebaseData() {
     async function uploadAvatar(e) {
         const file = e.target.files[0];
         if (!file || !currentUser) return;
+        if (!navigator.onLine) {
+            showToast('Загрузка фото доступна только онлайн', 'error');
+            return;
+        }
         try {
             const ref = storage.ref().child('avatars/' + currentUser.uid);
             await ref.put(file);
@@ -1484,8 +1612,13 @@ async function debugFirebaseData() {
         e.target.value = '';
     }
     
-    // ===== CHAT & PM (сокращённые версии) =====
+    // ===== CHAT & PM =====
     function initChat() {
+        if (!navigator.onLine) {
+            document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-lighter);">Чат доступен только онлайн</div>';
+            document.getElementById('chatInputArea').style.display = 'none';
+            return;
+        }
         db.collection('chat').orderBy('timestamp','asc').onSnapshot(snap => {
             const msgs = snap.docs.map(d => ({id:d.id,...d.data()}));
             renderChat(msgs);
@@ -1508,6 +1641,10 @@ async function debugFirebaseData() {
     }
     
     async function sendChatMessage() {
+        if (!navigator.onLine) {
+            showToast('Чат доступен только онлайн', 'error');
+            return;
+        }
         const text = document.getElementById('chatInput').value.trim();
         if (!text || !currentUser) return;
         await db.collection('chat').add({userId:currentUser.uid,username:getUserName(),text,timestamp:Date.now()});
@@ -1521,12 +1658,13 @@ async function debugFirebaseData() {
         } else {
             document.getElementById('pmLoginPrompt').style.display = 'none';
             document.getElementById('pmContainer').style.display = 'flex';
-            loadPmDialogs();
+            if (navigator.onLine) loadPmDialogs();
+            else document.getElementById('pmDialogs').innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-lighter);">Сообщения доступны только онлайн</p>';
         }
     }
     
     async function loadPmDialogs() {
-        if (!currentUser) return;
+        if (!currentUser || !navigator.onLine) return;
         const snap = await db.collection('users').get();
         const users = snap.docs.filter(d => d.id !== currentUser.uid).map(d => ({id:d.id,...d.data()}));
         const search = (document.getElementById('pmSearchInput')?.value||'').toLowerCase();
@@ -1539,6 +1677,10 @@ async function debugFirebaseData() {
     }
     
     async function openPmChat(otherId) {
+        if (!navigator.onLine) {
+            showToast('Личные сообщения доступны только онлайн', 'error');
+            return;
+        }
         currentPmUser = otherId;
         if (window.innerWidth < 769) document.getElementById('pmSidebar').style.display = 'none';
         document.getElementById('pmChatArea').style.display = 'flex';
@@ -1566,6 +1708,10 @@ async function debugFirebaseData() {
     }
     
     async function sendPmMessage(convId) {
+        if (!navigator.onLine) {
+            showToast('Сообщения доступны только онлайн', 'error');
+            return;
+        }
         const text = document.getElementById('pmInput').value.trim();
         if (!text || !currentUser) return;
         const ref = db.collection('privateMessages').doc(convId);
@@ -1587,22 +1733,22 @@ async function debugFirebaseData() {
     function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); document.body.style.overflow = ''; }
     document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeAuthModal(); });
     
-function switchAuthTab(tab) {
-    const lf = document.getElementById('loginForm'), rf = document.getElementById('registerForm');
-    const lt = document.getElementById('loginTabBtn'), rt = document.getElementById('registerTabBtn');
-    
-    if (tab === 'login') {
-        lf.style.display = 'block';
-        rf.style.display = 'none';
-        lt.classList.add('active');
-        rt.classList.remove('active');
-    } else {
-        lf.style.display = 'none';
-        rf.style.display = 'block';
-        rt.classList.add('active');
-        lt.classList.remove('active');
+    function switchAuthTab(tab) {
+        const lf = document.getElementById('loginForm'), rf = document.getElementById('registerForm');
+        const lt = document.getElementById('loginTabBtn'), rt = document.getElementById('registerTabBtn');
+        
+        if (tab === 'login') {
+            lf.style.display = 'block';
+            rf.style.display = 'none';
+            lt.classList.add('active');
+            rt.classList.remove('active');
+        } else {
+            lf.style.display = 'none';
+            rf.style.display = 'block';
+            rt.classList.add('active');
+            lt.classList.remove('active');
+        }
     }
-}
     
     async function login() {
         const email = document.getElementById('loginEmail').value.trim();
@@ -1651,7 +1797,7 @@ function switchAuthTab(tab) {
         } else {
             headerRight.innerHTML = '<button class="auth-btn" onclick="openAuthModal()">Войти</button>';
         }
-        db.collection('users').get().then(s => document.getElementById('statUsers').textContent = s.size);
+        db.collection('users').get().then(s => document.getElementById('statUsers').textContent = s.size).catch(() => {});
     }
     
     function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -1666,13 +1812,19 @@ function switchAuthTab(tab) {
     // ===== INIT =====
     auth.onAuthStateChanged(user => {
         updateUI(user);
-        if (document.getElementById('page-songs').classList.contains('active')) loadSongs();
+        if (document.getElementById('page-songs').classList.contains('active')) renderSongs();
     });
     
     window.addEventListener('load', () => {
         setTimeout(() => document.getElementById('loader').classList.add('loaded'), 2000);
         loadCategories();
         loadSongs();
+        updateOfflineStatus();
+        
+        // Register Service Worker for caching
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+        }
     });
     
     window.addEventListener('resize', () => {
@@ -1680,6 +1832,39 @@ function switchAuthTab(tab) {
             document.getElementById('pmSidebar').style.display = 'flex';
         }
     });
+</script>
+
+<!-- Service Worker -->
+<script>
+    // Create service worker file dynamically
+    if ('serviceWorker' in navigator) {
+        const swCode = `const CACHE_NAME = 'songbook-v1';
+const urlsToCache = [
+  '/',
+  '/index.html'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});`;
+        
+        // Only create if not exists
+        fetch('/sw.js').catch(() => {
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            const url = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(url);
+        });
+    }
 </script>
 </body>
 </html>

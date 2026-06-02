@@ -39,7 +39,7 @@
         }
         .hidden { display: none !important; }
 
-        /* OFFLINE INDICATOR */
+        /* OFFLINE INDICATOR - FIXED */
         .offline-indicator {
             position: fixed;
             top: 0;
@@ -48,17 +48,48 @@
             background: #c0392b;
             color: white;
             text-align: center;
-            padding: 8px;
-            font-size: 0.8rem;
-            z-index: 1000;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 10000;
             transform: translateY(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .offline-indicator.show {
             transform: translateY(0);
         }
         .offline-indicator.online {
-            background: #4a8c5c;
+            background: #2c7a4d;
+        }
+        .offline-indicator.syncing {
+            background: #d4a017;
+        }
+        .offline-indicator .indicator-icon {
+            font-size: 1.1rem;
+        }
+        .offline-indicator .indicator-text {
+            flex: 1;
+            text-align: left;
+        }
+        .offline-indicator .retry-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .offline-indicator .retry-btn:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         /* LOADER */
@@ -612,9 +643,11 @@
 </head>
 <body>
 
-<!-- OFFLINE INDICATOR -->
+<!-- OFFLINE INDICATOR - FIXED -->
 <div class="offline-indicator" id="offlineIndicator">
-    🔌 Нет соединения с интернетом. Песни доступны офлайн.
+    <span class="indicator-icon">📡</span>
+    <span class="indicator-text" id="offlineIndicatorText">Нет соединения с интернетом</span>
+    <button class="retry-btn" id="offlineRetryBtn" style="display:none;">🔄 Повторить</button>
 </div>
 
 <!-- LOADER -->
@@ -925,38 +958,108 @@
     let currentPmUser = null;
     let categories = ["Рождество","Пасха","Жатва","Троица","Свадьба","Семейные","Новый год","Прочее" ];
     let isOnline = navigator.onLine;
-    let localSongsCache = []; // Cache for offline songs
+    let localSongsCache = [];
+    let syncInProgress = false;
     
-    // ===== OFFLINE HANDLING =====
-    function updateOfflineStatus() {
-        const indicator = document.getElementById('offlineIndicator');
-        if (!navigator.onLine) {
-            indicator.classList.add('show');
-            indicator.classList.remove('online');
-            showToast('Офлайн-режим: доступны сохранённые песни', 'info');
-        } else {
-            indicator.classList.add('show');
-            indicator.classList.add('online');
-            indicator.textContent = '✅ Интернет восстановлен. Данные синхронизируются.';
+    // ===== IMPROVED OFFLINE HANDLING =====
+    const offlineIndicator = document.getElementById('offlineIndicator');
+    const offlineIndicatorText = document.getElementById('offlineIndicatorText');
+    const offlineRetryBtn = document.getElementById('offlineRetryBtn');
+    
+    function showOfflineIndicator(type, message, showRetry = false) {
+        offlineIndicator.classList.add('show');
+        offlineIndicator.classList.remove('online', 'syncing');
+        
+        const iconSpan = offlineIndicator.querySelector('.indicator-icon');
+        
+        if (type === 'offline') {
+            offlineIndicator.style.background = '#c0392b';
+            iconSpan.textContent = '📡';
+            offlineIndicatorText.textContent = message || 'Нет соединения с интернетом. Данные из кеша.';
+            offlineRetryBtn.style.display = showRetry ? 'flex' : 'none';
+        } else if (type === 'online') {
+            offlineIndicator.style.background = '#2c7a4d';
+            iconSpan.textContent = '✅';
+            offlineIndicatorText.textContent = message || 'Интернет восстановлен. Данные синхронизируются...';
+            offlineRetryBtn.style.display = 'none';
+            
+            // Auto-hide after 3 seconds for online success
             setTimeout(() => {
-                indicator.classList.remove('show');
-                indicator.textContent = '🔌 Нет соединения с интернетом. Песни доступны офлайн.';
-                indicator.classList.remove('online');
+                if (navigator.onLine && offlineIndicator.classList.contains('show') && !syncInProgress) {
+                    offlineIndicator.classList.remove('show');
+                }
             }, 3000);
-            // Refresh data when back online
+        } else if (type === 'syncing') {
+            offlineIndicator.style.background = '#d4a017';
+            iconSpan.textContent = '🔄';
+            offlineIndicatorText.textContent = message || 'Синхронизация данных...';
+            offlineRetryBtn.style.display = 'none';
+        }
+    }
+    
+    function hideOfflineIndicator() {
+        if (navigator.onLine && !syncInProgress) {
+            offlineIndicator.classList.remove('show');
+        }
+    }
+    
+    // Manual retry
+    offlineRetryBtn.addEventListener('click', () => {
+        if (!navigator.onLine) {
+            showOfflineIndicator('offline', 'Нет соединения. Проверьте интернет.', true);
+        } else {
+            showOfflineIndicator('syncing', 'Повторная синхронизация...');
+            syncDataAfterReconnect();
+        }
+    });
+    
+    async function syncDataAfterReconnect() {
+        if (!navigator.onLine) return;
+        syncInProgress = true;
+        showOfflineIndicator('syncing', 'Синхронизация данных...');
+        
+        try {
+            await loadSongs();
+            await cacheCategoriesLocally();
+            await cacheSongsLocally();
+            
+            // Reload current page data
             if (document.getElementById('page-songs').classList.contains('active')) {
-                loadSongs();
+                renderSongs();
             }
-            if (document.getElementById('page-chat').classList.contains('active')) {
+            if (document.getElementById('page-chat').classContains('active')) {
                 initChat();
             }
+            
+            showOfflineIndicator('online', '✅ Синхронизация завершена!');
+            setTimeout(() => {
+                if (navigator.onLine) {
+                    offlineIndicator.classList.remove('show');
+                }
+                syncInProgress = false;
+            }, 2000);
+        } catch(e) {
+            console.error('Sync error:', e);
+            showOfflineIndicator('offline', 'Ошибка синхронизации. Некоторые функции могут быть ограничены.', true);
+            syncInProgress = false;
+        }
+    }
+    
+    function updateOfflineStatus() {
+        if (navigator.onLine) {
+            console.log('Back online, syncing...');
+            syncDataAfterReconnect();
+        } else {
+            showOfflineIndicator('offline', 'Нет соединения с интернетом. Песни доступны из кеша.', true);
         }
     }
     
     window.addEventListener('online', updateOfflineStatus);
-    window.addEventListener('offline', updateOfflineStatus);
+    window.addEventListener('offline', () => {
+        showOfflineIndicator('offline', 'Нет соединения с интернетом. Песни доступны из кеша.', true);
+    });
     
-    // Save songs to localStorage for offline access
+    // Cache songs to localStorage for offline access
     async function cacheSongsLocally() {
         try {
             const snap = await db.collection('songs').get();
@@ -1027,7 +1130,7 @@
     
     function renderAvatar(name, size, photoURL) {
         if (photoURL) {
-            return `<div class="user-avatar" style="width:${size};height:${size};background-image:url('${photoURL}');"></div>`;
+            return `<div class="user-avatar" style="width:${size};height:${size};background-image:url('${photoURL}');background-size:cover;background-position:center;"></div>`;
         }
         const color = getAvatarColor(name);
         const initials = getInitials(name);
@@ -1154,10 +1257,11 @@
                 renderSongs();
             } catch(e) { 
                 console.error('Error loading from network:', e);
-                renderSongs(true); // Use cache
+                renderSongs(true);
+                showOfflineIndicator('offline', 'Ошибка сети. Используется кеш песен.', true);
             }
         } else {
-            renderSongs(true); // Use cache when offline
+            renderSongs(true);
         }
     }
     
@@ -1227,7 +1331,6 @@
     }
     
     async function openSongModal(songId) {
-        // Try to get from cache first
         let song = null;
         const cached = getCachedSongs();
         song = cached.find(s => s.id === songId);
@@ -1571,7 +1674,8 @@
         if (!currentUser) return;
         document.getElementById('profileName').value = getUserName();
         document.getElementById('profileEmail').value = currentUser.email || '';
-        document.getElementById('profileAvatar').innerHTML = renderAvatar(getUserName(), '90px', getUserPhoto());
+        const avatarHtml = renderAvatar(getUserName(), '90px', getUserPhoto());
+        document.getElementById('profileAvatar').innerHTML = avatarHtml;
         document.getElementById('profileAvatar').className = getUserPhoto() ? 'profile-avatar-large' : 'profile-avatar-large initials-avatar';
         document.getElementById('profileModal').classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -1819,7 +1923,10 @@
         setTimeout(() => document.getElementById('loader').classList.add('loaded'), 2000);
         loadCategories();
         loadSongs();
-        updateOfflineStatus();
+        // Initial offline status check
+        if (!navigator.onLine) {
+            showOfflineIndicator('offline', 'Нет соединения с интернетом. Песни доступны из кеша.', true);
+        }
         
         // Register Service Worker for caching
         if ('serviceWorker' in navigator) {

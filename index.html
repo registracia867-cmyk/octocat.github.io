@@ -1,1977 +1,407 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Молодежь церкви Живое Слово</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #1a2a4a; --primary-light: #2a3f6e;
-            --gold: #c9a84c; --gold-light: #e8d08c; --gold-dark: #a08535;
-            --bg: #f5f0e8; --card-bg: #ffffff;
-            --text: #2c2c2c; --text-light: #6b6b6b; --text-lighter: #999;
-            --shadow: 0 2px 16px rgba(26,42,74,0.08);
-            --shadow-lg: 0 8px 32px rgba(26,42,74,0.12);
-            --radius: 16px;
-            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
-            --green: #4a8c5c; --green-light: #e8f5ec;
-            --red: #c0392b; --red-light: #fde8e6;
-            --blue-accent: #3a7bd5; --admin-badge: #9b59b6;
-            --bottom-nav-height: 64px;
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-top: env(safe-area-inset-top, 0px);
-        }
-        html { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            min-height: 100vh;
-            padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom));
-            -webkit-tap-highlight-color: transparent;
-        }
-        .hidden { display: none !important; }
-
-        /* OFFLINE INDICATOR - FIXED */
-        .offline-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #c0392b;
-            color: white;
-            text-align: center;
-            padding: 10px 16px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            z-index: 10000;
-            transform: translateY(-100%);
-            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .offline-indicator.show {
-            transform: translateY(0);
-        }
-        .offline-indicator.online {
-            background: #2c7a4d;
-        }
-        .offline-indicator.syncing {
-            background: #d4a017;
-        }
-        .offline-indicator .indicator-icon {
-            font-size: 1.1rem;
-        }
-        .offline-indicator .indicator-text {
-            flex: 1;
-            text-align: left;
-        }
-        .offline-indicator .retry-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        .offline-indicator .retry-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        /* LOADER */
-        #loader { 
-            position: fixed; inset: 0; z-index: 10000; 
-            background: linear-gradient(135deg, #0f1a30, #1a2a4a 50%, #2a3f6e); 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            transition: opacity 0.8s ease, visibility 0.8s ease; 
-        }
-        #loader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-cross { position: relative; width: 60px; height: 90px; margin-bottom: 30px; }
-        .loader-cross::before, .loader-cross::after { 
-            content: ''; position: absolute; background: var(--gold); border-radius: 3px; 
-            animation: crossGlow 2s ease-in-out infinite; 
-        }
-        .loader-cross::before { width: 10px; height: 100%; left: 50%; transform: translateX(-50%); }
-        .loader-cross::after { width: 50px; height: 10px; top: 25px; left: 50%; transform: translateX(-50%); }
-        @keyframes crossGlow { 
-            0%,100%{box-shadow:0 0 10px var(--gold),0 0 20px rgba(201,168,76,0.3);} 
-            50%{box-shadow:0 0 20px var(--gold),0 0 40px rgba(201,168,76,0.6),0 0 60px rgba(201,168,76,0.3);} 
-        }
-        .loader-text { 
-            font-family: 'Montserrat', sans-serif; font-size: 1.8rem; font-weight: 700; 
-            color: #fff; letter-spacing: 4px; margin-bottom: 20px; 
-        }
-        .loader-text span { color: var(--gold); }
-        .loader-subtitle { 
-            color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 2px; 
-            text-transform: uppercase; margin-bottom: 30px; 
-        }
-        .loader-bar-container { 
-            width: 160px; height: 2px; background: rgba(255,255,255,0.1); 
-            border-radius: 2px; overflow: hidden; 
-        }
-        .loader-bar { 
-            height: 100%; width: 0%; 
-            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light)); 
-            border-radius: 2px; animation: loadBar 2s ease forwards; 
-        }
-        @keyframes loadBar { to{width:100%;} }
-
-        /* HEADER */
-        header { 
-            background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
-            position: sticky; top: 0; z-index: 100; 
-            box-shadow: 0 2px 20px rgba(0,0,0,0.15); padding-top: var(--safe-top); 
-        }
-        .header-inner { 
-            max-width: 1200px; margin: 0 auto; padding: 10px 16px; 
-            display: flex; align-items: center; justify-content: space-between; gap: 12px; 
-        }
-        .logo-area { 
-            display: flex; align-items: center; gap: 10px; cursor: pointer; 
-            text-decoration: none; flex-shrink: 0; 
-        }
-        .logo-area svg { width: 36px; height: 36px; flex-shrink: 0; }
-        .logo-text { 
-            font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.1rem; 
-            color: #fff; letter-spacing: 2px; white-space: nowrap; 
-        }
-        .logo-text span { color: var(--gold); }
-        
-        .nav-desktop { display: none; gap: 4px; align-items: center; }
-        .nav-link { 
-            color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.85rem; 
-            padding: 8px 16px; border-radius: 10px; transition: var(--transition); 
-            cursor: pointer; border: none; background: none; font-family: inherit; 
-            white-space: nowrap; font-weight: 500;
-        }
-        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
-        .nav-link.active { background: var(--gold); color: var(--primary); font-weight: 600; }
-        
-        .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
-        .mobile-menu-btn svg { width: 24px; height: 24px; stroke: #fff; }
-        
-        .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        
-        .user-badge { 
-            display: flex; align-items: center; gap: 8px; cursor: pointer; 
-            padding: 6px 14px 6px 6px; border-radius: 24px; 
-            background: rgba(255,255,255,0.1); position: relative; min-height: 44px; 
-            transition: var(--transition);
-        }
-        .user-badge:hover { background: rgba(255,255,255,0.15); }
-        .user-avatar { 
-            width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex-shrink: 0; 
-            background-size: cover; background-position: center; 
-        }
-        .user-avatar.initials-avatar { 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 0.8rem; color: #fff; 
-        }
-        .user-name { color: #fff; font-size: 0.88rem; font-weight: 500; }
-        .user-dropdown { 
-            position: absolute; top: 100%; right: 0; margin-top: 8px; 
-            background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow-lg); 
-            padding: 8px; min-width: 220px; opacity: 0; visibility: hidden; 
-            transform: translateY(-10px); transition: var(--transition); z-index: 200; 
-        }
-        .user-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
-        .dropdown-item { 
-            padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; color: var(--text); 
-            cursor: pointer; display: flex; align-items: center; gap: 10px; 
-            border: none; background: none; width: 100%; font-family: inherit; 
-            min-height: 44px; transition: var(--transition);
-        }
-        .dropdown-item:hover { background: var(--bg); }
-        .dropdown-item.danger { color: var(--red); }
-        .auth-btn { 
-            padding: 10px 20px; background: var(--gold); color: var(--primary); 
-            border: none; border-radius: 10px; font-size: 0.88rem; font-weight: 600; 
-            font-family: inherit; cursor: pointer; white-space: nowrap; 
-            min-height: 44px; min-width: 44px; transition: var(--transition);
-        }
-        .auth-btn:hover { background: var(--gold-dark); }
-        .auth-btn:active { transform: scale(0.96); }
-
-        /* HERO */
-        .hero { 
-            position: relative; 
-            background: linear-gradient(135deg, var(--primary), #1e3566 50%, var(--primary-light)); 
-            padding: 40px 16px; text-align: center; overflow: hidden; 
-        }
-        .hero-content { position: relative; z-index: 2; max-width: 480px; margin: 0 auto; }
-        .hero h1 { 
-            font-family: 'Montserrat', sans-serif; font-size: 1.6rem; font-weight: 700; 
-            color: #fff; margin-bottom: 10px; line-height: 1.2; 
-        }
-        .hero h1 span { color: var(--gold); }
-        .hero p { color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
-        .hero-stats { display: flex; justify-content: center; gap: 28px; margin-top: 24px; }
-        .hero-stat { text-align: center; }
-        .hero-stat-num { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--gold); }
-        .hero-stat-label { color: rgba(255,255,255,0.5); font-size: 0.75rem; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* CONTROLS */
-        .controls-section { margin: -20px auto 0; padding: 0 12px; position: relative; z-index: 10; max-width: 600px; }
-        .controls-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 16px; }
-        .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        .search-input-wrap { flex: 1; position: relative; }
-        .search-icon { 
-            position: absolute; left: 14px; top: 50%; transform: translateY(-50%); 
-            width: 18px; height: 18px; stroke: var(--text-lighter); fill: none; 
-            stroke-width: 2; pointer-events: none; 
-        }
-        .search-input { 
-            width: 100%; padding: 12px 12px 12px 42px; border: 2px solid #e8e4dc; 
-            border-radius: 12px; font-size: 0.9rem; font-family: inherit; color: var(--text); 
-            background: var(--bg); transition: var(--transition); outline: none; min-height: 44px; 
-        }
-        .search-input:focus { border-color: var(--gold); }
-        .sort-select { 
-            padding: 12px 36px 12px 14px; border: 2px solid #e8e4dc; border-radius: 12px; 
-            font-size: 0.85rem; font-family: inherit; color: var(--text); background: var(--bg); 
-            cursor: pointer; outline: none; appearance: none; min-height: 44px; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); 
-            background-repeat: no-repeat; background-position: right 10px center; 
-        }
-        .filter-tags { 
-            display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; 
-            padding-bottom: 4px; flex-wrap: nowrap; 
-        }
-        .filter-tags::-webkit-scrollbar { height: 0; }
-        .filter-tag { 
-            padding: 10px 18px; border-radius: 24px; border: 2px solid #e8e4dc; 
-            background: transparent; font-size: 0.85rem; font-family: inherit; 
-            color: var(--text-light); cursor: pointer; white-space: nowrap; flex-shrink: 0; 
-            min-height: 44px; transition: var(--transition);
-        }
-        .filter-tag.active { 
-            background: var(--gold); border-color: var(--gold); color: var(--primary); 
-            font-weight: 600; 
-        }
-        .results-count { 
-            font-size: 0.8rem; color: var(--text-lighter); margin-top: 12px; 
-            padding-top: 12px; border-top: 1px solid #eee; 
-        }
-        .results-count strong { color: var(--gold-dark); }
-
-        /* SONGS */
-        .songs-section { margin: 20px auto; padding: 0 12px; max-width: 600px; }
-        .songs-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
-        .song-card { 
-            background: var(--card-bg); border-radius: var(--radius); 
-            box-shadow: var(--shadow); overflow: hidden; cursor: pointer; position: relative; 
-            transition: var(--transition);
-        }
-        .song-card:active { transform: scale(0.98); }
-        .song-card-header { 
-            background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
-            padding: 16px; position: relative; overflow: hidden; 
-        }
-        .song-category-badge { 
-            display: inline-block; padding: 3px 10px; background: rgba(201,168,76,0.2); 
-            color: var(--gold-light); border-radius: 20px; font-size: 0.68rem; font-weight: 600; 
-            letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; 
-        }
-        .song-card-title { 
-            font-family: 'Montserrat', sans-serif; font-size: 1.05rem; font-weight: 700; 
-            color: #fff; margin-bottom: 4px; 
-        }
-        .song-card-author { color: rgba(255,255,255,0.6); font-size: 0.78rem; }
-        .song-card-body { padding: 14px 16px; }
-        .song-preview { 
-            color: var(--text-light); font-size: 0.85rem; line-height: 1.6; 
-            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; 
-        }
-        .song-card-footer { 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 8px 16px; border-top: 1px solid #f0ece4; 
-        }
-        .song-date { font-size: 0.72rem; color: var(--text-lighter); }
-        .song-open-btn { 
-            padding: 8px 16px; background: var(--gold); color: var(--primary); 
-            border: none; border-radius: 10px; font-size: 0.82rem; font-weight: 600; 
-            font-family: inherit; cursor: pointer; min-height: 44px; min-width: 44px; 
-            transition: var(--transition);
-        }
-        .song-open-btn:active { transform: scale(0.95); }
-        .admin-actions { 
-            position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10; 
-        }
-        .admin-btn { 
-            background: rgba(0,0,0,0.6); border: none; border-radius: 8px; 
-            padding: 6px 10px; cursor: pointer; color: white; font-size: 0.7rem; 
-            min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; 
-            transition: var(--transition);
-        }
-        .admin-btn.delete:hover { background: var(--red); }
-        .admin-btn.edit:hover { background: var(--blue-accent); }
-
-        /* MODAL */
-        .modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(8px); z-index: 1000; display: flex; 
-            align-items: flex-end; justify-content: center; 
-            opacity: 0; visibility: hidden; transition: var(--transition); 
-        }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal { 
-            background: var(--card-bg); width: 100%; max-height: 90vh; overflow-y: auto; 
-            transform: translateY(100%); transition: 0.4s cubic-bezier(0.4,0,0.2,1); 
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-radius: 20px 20px 0 0; 
-            -webkit-overflow-scrolling: touch; padding-bottom: var(--safe-bottom); 
-        }
-        .modal-overlay.active .modal { transform: translateY(0); }
-        .modal-header { 
-            background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
-            padding: 20px; position: sticky; top: 0; z-index: 10; border-radius: 20px 20px 0 0; 
-        }
-        .modal-close { 
-            position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; 
-            border-radius: 10px; background: rgba(255,255,255,0.1); border: none; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; 
-        }
-        .modal-close svg { width: 16px; height: 16px; stroke: #fff; stroke-width: 2.5; }
-        .modal-category { 
-            display: inline-block; padding: 3px 12px; background: rgba(201,168,76,0.25); 
-            color: var(--gold-light); border-radius: 20px; font-size: 0.68rem; font-weight: 600; 
-            text-transform: uppercase; margin-bottom: 8px; 
-        }
-        .modal-title { 
-            font-family: 'Montserrat', sans-serif; font-size: 1.3rem; font-weight: 700; 
-            color: #fff; margin-bottom: 4px; 
-        }
-        .modal-author { color: rgba(255,255,255,0.6); font-size: 0.85rem; }
-        .modal-body { padding: 20px; }
-        .modal-lyrics { 
-            white-space: pre-wrap; line-height: 1.8; font-size: 0.9rem; color: var(--text); 
-            margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f0ece4; 
-        }
-
-        /* FORMS */
-        .edit-form-container { display: none; margin-top: 20px; }
-        .edit-form-container.active { display: block; }
-        .form-group { margin-bottom: 14px; }
-        .form-label { 
-            display: block; font-size: 0.82rem; font-weight: 600; color: var(--text); 
-            margin-bottom: 4px; 
-        }
-        .form-input { 
-            width: 100%; padding: 12px 14px; border: 2px solid #e8e4dc; border-radius: 12px; 
-            font-size: 0.9rem; font-family: inherit; color: var(--text); background: var(--bg); 
-            outline: none; min-height: 44px; transition: var(--transition);
-        }
-        .form-input:focus { border-color: var(--gold); }
-        textarea.form-input { resize: vertical; min-height: 120px; }
-        .form-btn { 
-            padding: 12px 20px; border: none; border-radius: 12px; font-size: 0.9rem; 
-            font-weight: 600; font-family: inherit; cursor: pointer; min-height: 44px; 
-            min-width: 44px; transition: var(--transition);
-        }
-        .form-btn.primary { background: var(--gold); color: var(--primary); }
-        .form-btn.primary:hover { background: var(--gold-dark); }
-        .form-btn.secondary { background: #e0e0e0; color: var(--text); }
-        .form-btn.danger { background: var(--red); color: #fff; }
-        .form-btn.info { background: var(--blue-accent); color: #fff; }
-
-        /* COMMENTS */
-        .comments-section { padding: 0 20px 20px; }
-        .comments-list { 
-            display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; 
-            max-height: 300px; overflow-y: auto; 
-        }
-        .comment-item { 
-            display: flex; gap: 10px; padding: 12px; background: var(--bg); border-radius: 12px; 
-        }
-        .comment-avatar { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
-        .comment-body { flex: 1; }
-        .comment-author { font-weight: 600; font-size: 0.82rem; color: var(--text); }
-        .comment-text { font-size: 0.85rem; color: var(--text-light); line-height: 1.5; margin-top: 4px; }
-        .comment-form { display: flex; gap: 8px; }
-        .comment-input { 
-            flex: 1; padding: 12px 14px; border: 2px solid #e8e4dc; border-radius: 12px; 
-            font-size: 0.9rem; font-family: inherit; outline: none; min-height: 44px; 
-        }
-        .comment-submit { 
-            padding: 12px 18px; background: var(--gold); color: var(--primary); 
-            border: none; border-radius: 12px; font-weight: 600; font-family: inherit; 
-            cursor: pointer; min-height: 44px; 
-        }
-
-        /* CHAT */
-        .chat-section { margin: 20px auto; padding: 0 12px; max-width: 600px; }
-        .chat-card { 
-            background: var(--card-bg); border-radius: var(--radius); 
-            box-shadow: var(--shadow-lg); overflow: hidden; 
-        }
-        .chat-header { 
-            background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
-            padding: 14px 16px; display: flex; align-items: center; gap: 10px; 
-        }
-        .chat-header h2 { 
-            font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; 
-        }
-        .chat-messages { 
-            padding: 14px 16px; max-height: 400px; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 10px; 
-        }
-        .msg-item { display: flex; gap: 8px; }
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
-        .msg-content { flex: 1; background: var(--bg); padding: 8px 14px; border-radius: 12px 12px 12px 4px; }
-        .msg-self .msg-content { background: #e8f5ec; border-radius: 12px 12px 4px 12px; }
-        .msg-name { font-weight: 600; font-size: 0.78rem; }
-        .msg-text { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
-        .chat-input-area { 
-            padding: 12px 16px; border-top: 1px solid #f0ece4; display: flex; gap: 8px; 
-        }
-        .chat-input { 
-            flex: 1; padding: 12px 14px; border: 2px solid #e8e4dc; border-radius: 12px; 
-            font-size: 0.9rem; font-family: inherit; outline: none; min-height: 44px; 
-        }
-        .chat-send { 
-            padding: 12px 18px; background: var(--gold); color: var(--primary); 
-            border: none; border-radius: 12px; font-weight: 600; cursor: pointer; min-height: 44px; 
-        }
-
-        /* PM */
-        .pm-section { margin: 20px auto; padding: 0 12px; max-width: 600px; }
-        .pm-container { 
-            background: var(--card-bg); border-radius: var(--radius); 
-            box-shadow: var(--shadow-lg); overflow: hidden; display: flex; 
-            flex-direction: column; height: 60vh; min-height: 400px; 
-        }
-        .pm-sidebar { flex: 1; display: flex; flex-direction: column; }
-        .pm-sidebar-header { 
-            padding: 14px 16px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
-            display: flex; align-items: center; gap: 8px; 
-        }
-        .pm-sidebar-header h3 { 
-            font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; 
-        }
-        .pm-search-bar { padding: 10px 14px; border-bottom: 1px solid #e8e4dc; }
-        .pm-search-input { 
-            width: 100%; padding: 10px 14px; border: 2px solid #e8e4dc; border-radius: 10px; 
-            font-size: 0.85rem; font-family: inherit; outline: none; min-height: 44px; 
-        }
-        .pm-dialogs { flex: 1; overflow-y: auto; }
-        .pm-dialog-item { 
-            display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; 
-            border-left: 3px solid transparent; min-height: 44px; transition: var(--transition);
-        }
-        .pm-dialog-item:active { background: var(--bg); }
-        .pm-dialog-item.active { background: var(--green-light); border-left-color: var(--green); }
-        .pm-chat-area { flex: 1; display: flex; flex-direction: column; }
-        .pm-chat-header { 
-            padding: 14px 16px; background: #faf8f4; border-bottom: 1px solid #e8e4dc; 
-            display: flex; align-items: center; gap: 10px; 
-        }
-        .pm-back-btn { 
-            background: none; border: none; cursor: pointer; padding: 8px; 
-            min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; 
-        }
-        .pm-chat-messages { 
-            flex: 1; padding: 14px 16px; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 8px; 
-        }
-        .pm-msg { display: flex; gap: 6px; max-width: 80%; }
-        .pm-msg.sent { align-self: flex-end; flex-direction: row-reverse; }
-        .pm-msg-bubble { padding: 8px 14px; border-radius: 14px; font-size: 0.85rem; }
-        .pm-msg:not(.sent) .pm-msg-bubble { background: var(--bg); border-bottom-left-radius: 4px; }
-        .pm-msg.sent .pm-msg-bubble { background: var(--green); color: #fff; border-bottom-right-radius: 4px; }
-        .pm-chat-input-area { 
-            padding: 12px 16px; border-top: 1px solid #e8e4dc; display: flex; gap: 8px; 
-        }
-
-        /* ADMIN */
-        .admin-section { margin: 20px auto; padding: 0 12px; max-width: 600px; }
-        .admin-card { 
-            background: var(--card-bg); border-radius: var(--radius); 
-            box-shadow: var(--shadow-lg); padding: 20px; 
-        }
-        .admin-card h2 { margin-bottom: 20px; font-family: 'Montserrat', sans-serif; }
-        .admin-card h3 { margin-bottom: 15px; color: var(--primary); }
-        .admin-song-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px; border-bottom: 1px solid #eee; gap: 10px; 
-        }
-        .category-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px; border-bottom: 1px solid #eee; gap: 10px; 
-        }
-        .category-edit-form { display: none; margin-top: 10px; }
-        .category-edit-form.active { display: flex; gap: 8px; align-items: center; }
-
-        /* PROFILE */
-        .profile-avatar-section { text-align: center; padding: 20px; }
-        .profile-avatar-large { 
-            width: 90px; height: 90px; border-radius: 50%; overflow: hidden; 
-            margin: 0 auto 10px; cursor: pointer; border: 4px solid var(--gold-light); 
-            background-size: cover; background-position: center; position: relative; 
-            transition: var(--transition);
-        }
-        .profile-avatar-large:hover { border-color: var(--gold); }
-        .profile-avatar-large.initials-avatar { 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 2rem; color: #fff; 
-        }
-        .profile-avatar-overlay { 
-            position: absolute; inset: 0; background: rgba(0,0,0,0.4); 
-            display: flex; align-items: center; justify-content: center; 
-            opacity: 0; transition: var(--transition); border-radius: 50%; 
-        }
-        .profile-avatar-large:hover .profile-avatar-overlay { opacity: 1; }
-        .profile-success { 
-            display: none; text-align: center; padding: 10px; color: var(--green); font-weight: 600; 
-        }
-        .profile-success.show { display: block; }
-
-        /* BOTTOM NAV */
-        .bottom-nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); 
-            display: flex; align-items: center; justify-content: space-around; 
-            padding: 6px 8px; padding-bottom: calc(6px + var(--safe-bottom)); 
-            box-shadow: 0 -2px 16px rgba(0,0,0,0.08); z-index: 200; 
-        }
-        .bottom-nav-item { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            gap: 4px; padding: 6px 12px; border-radius: 12px; cursor: pointer; 
-            border: none; background: none; font-family: inherit; color: var(--text-lighter); 
-            font-size: 0.65rem; font-weight: 500; min-width: 44px; min-height: 44px; 
-            transition: var(--transition);
-        }
-        .bottom-nav-item svg { 
-            width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; 
-        }
-        .bottom-nav-item.active { 
-            color: var(--gold-dark); background: rgba(201,168,76,0.1); 
-        }
-
-        /* FOOTER */
-        footer { 
-            background: var(--primary); padding: 24px 16px; text-align: center; margin-top: 30px; 
-        }
-        .footer-logo { 
-            font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; 
-        }
-        .footer-logo span { color: var(--gold); }
-        footer p { color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 6px; }
-
-        /* TOAST */
-        .toast-container { 
-            position: fixed; bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 12px); 
-            right: 12px; z-index: 9999; display: flex; flex-direction: column; gap: 6px; 
-        }
-        .toast { 
-            padding: 12px 16px; border-radius: 12px; color: #fff; font-size: 0.82rem; 
-            font-weight: 500; box-shadow: var(--shadow-lg); 
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.6s forwards; max-width: 280px; 
-        }
-        .toast.success { background: var(--green); }
-        .toast.error { background: var(--red); }
-        .toast.info { background: var(--blue-accent); }
-        @keyframes toastIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
-        @keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
-
-        .page { display: none; }
-        .page.active { display: block; }
-
-        /* RESPONSIVE */
-        @media (min-width: 481px) {
-            .songs-grid { grid-template-columns: 1fr 1fr; }
-            .hero h1 { font-size: 1.8rem; }
-        }
-        @media (min-width: 769px) {
-            body { padding-bottom: 0; }
-            .header-inner { padding: 10px 24px; }
-            .nav-desktop { display: flex; }
-            .bottom-nav { display: none; }
-            .filter-tags { flex-wrap: wrap; overflow-x: visible; }
-            .modal { border-radius: 16px; max-width: 600px; }
-            .modal-overlay { align-items: center; }
-            .songs-grid { grid-template-columns: repeat(2, 1fr); }
-            .pm-container { flex-direction: row; }
-            .pm-sidebar { width: 280px; border-right: 1px solid #e8e4dc; }
-            .toast-container { bottom: 20px; right: 20px; }
-            .hero { padding: 50px 24px; }
-            .hero h1 { font-size: 2rem; }
-        }
-        @media (min-width: 1025px) {
-            .header-inner { max-width: 1024px; }
-            .controls-section, .songs-section { max-width: 1024px; }
-            .songs-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-            .chat-section, .pm-section, .admin-section { max-width: 900px; }
-            .hero h1 { font-size: 2.4rem; }
-        }
-
-        .auth-tab-btn {
-            flex: 1;
-            padding: 14px;
-            text-align: center;
-            font-weight: 600;
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: var(--text-lighter);
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-            transition: var(--transition);
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        .auth-tab-btn.active {
-            color: var(--gold-dark);
-            border-bottom: 2px solid var(--gold);
-        }
-        .auth-tab-btn:hover {
-            color: var(--gold-dark);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecuVault — Менеджер паролей (secuvault-db)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    body { background-color: #0b0f19; color: #f3f4f6; font-family: 'Inter', system-ui, sans-serif; }
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    }
+    .expired-card { animation: pulse-red 2s infinite; border-color: #ef4444 !important; }
+  </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<!-- OFFLINE INDICATOR - FIXED -->
-<div class="offline-indicator" id="offlineIndicator">
-    <span class="indicator-icon">📡</span>
-    <span class="indicator-text" id="offlineIndicatorText">Нет соединения с интернетом</span>
-    <button class="retry-btn" id="offlineRetryBtn" style="display:none;">🔄 Повторить</button>
-</div>
-
-<!-- LOADER -->
-<div id="loader">
-    <div class="loader-cross"></div>
-    <div class="loader-text"><span>Ж</span>ивое <span>С</span>лово</div>
-    <div class="loader-subtitle">ПЕСЕННИК</div>
-    <div class="loader-bar-container"><div class="loader-bar"></div></div>
-</div>
-
-<!-- HEADER -->
-<header>
-    <div class="header-inner">
-        <div class="logo-area" onclick="scrollToTop()" style="cursor:pointer;">
-            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#c9a84c" fill-opacity="0.15"/><rect x="14" y="4" width="12" height="32" rx="3" fill="#c9a84c"/><rect x="6" y="12" width="28" height="12" rx="3" fill="#c9a84c"/></svg>
-            <div class="logo-text">Живое Слово</div>
+  <!-- Экран блокировки (Мастер-пароль) -->
+  <div id="lockScreen" class="fixed inset-0 bg-[#0b0f19] z-50 flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl">
+          <i class="fa-solid fa-key"></i>
         </div>
-        
-        <nav class="nav-desktop" id="navDesktop">
-            <button class="nav-link active" onclick="switchPage('songs', this)">Песни</button>
-            <button class="nav-link" onclick="switchPage('chat', this)">Чат</button>
-            <button class="nav-link" onclick="switchPage('pm', this)">Сообщения</button>
-            <button class="nav-link admin-only" id="navAdminBtn" onclick="switchPage('admin', this)" style="display:none;">Админ</button>
-        </nav>
-        
-        <div class="header-right" id="headerRight">
-            <button class="auth-btn" onclick="openAuthModal()">Войти</button>
+        <div>
+          <h2 class="text-lg font-bold text-white">Хранилище SecuVault</h2>
+          <p class="text-xs text-amber-400 flex items-center gap-1">
+            <i class="fa-solid fa-fire"></i> Проект: secuvault-db (AES-256-GCM)
+          </p>
         </div>
+      </div>
+
+      <p class="text-xs text-gray-400 leading-relaxed">
+        Введите ваш <strong>Мастер-пароль</strong> для расшифровки базы данных. Если вы запускаете панель впервые, этот пароль станет ключом шифрования для всех новых записей.
+      </p>
+
+      <form onsubmit="unlockVault(event)" class="space-y-4">
+        <div>
+          <label class="text-xs text-gray-400">Мастер-пароль</label>
+          <input id="masterPassInput" type="password" required minlength="4" placeholder="Минимум 4 символа..." class="w-full mt-1 px-3.5 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-sm text-white font-mono focus:outline-none focus:border-emerald-500" />
+          <p id="lockError" class="text-xs text-red-400 mt-2 hidden">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i> Неверный мастер-пароль! Не удалось расшифровать записи из Firestore.
+          </p>
+        </div>
+        <button id="unlockBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+          <i class="fa-solid fa-unlock-keyhole"></i> Разблокировать и синхронизировать
+        </button>
+      </form>
     </div>
-</header>
+  </div>
 
-<!-- HERO -->
-<section class="hero" id="heroSection">
-    <div class="hero-content">
-        <h1>Пойте <span>Господу</span> песнь новую</h1>
-        <p>Собрание христианских песен для молодёжи</p>
-        <div class="hero-stats">
-            <div class="hero-stat"><div class="hero-stat-num" id="statSongs">0</div><div class="hero-stat-label">Песен</div></div>
-            <div class="hero-stat"><div class="hero-stat-num" id="statCategories">5</div><div class="hero-stat-label">Категорий</div></div>
-            <div class="hero-stat"><div class="hero-stat-num" id="statUsers">0</div><div class="hero-stat-label">Участников</div></div>
+  <!-- Верхняя панель -->
+  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
+          <i class="fa-solid fa-shield-halved"></i>
         </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2 flex-wrap">
+            SecuVault
+            <span id="dbStatusBadge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30">
+              <i class="fa-solid fa-cloud mr-1"></i>Firestore: secuvault-db
+            </span>
+            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <i class="fa-solid fa-lock mr-1"></i>AES-256-GCM
+            </span>
+          </h1>
+          <p class="text-xs text-gray-400">Облачный учёт данных для входа и контроль ротации паролей</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="lockVault()" class="px-3 py-2 rounded-lg text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 transition flex items-center gap-1.5" title="Стереть ключ из памяти и заблокировать">
+          <i class="fa-solid fa-lock text-emerald-400"></i> Блокировать
+        </button>
+        <button onclick="exportJSON()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 transition flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> Бэкап JSON
+        </button>
+        <button onclick="openAddModal()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+          <i class="fa-solid fa-plus"></i> Добавить сервис
+        </button>
+      </div>
     </div>
-</section>
+  </header>
 
-<!-- PAGES -->
-<div class="page active" id="page-songs">
-    <section class="controls-section">
-        <div class="controls-card">
-            <div class="search-row">
-                <div class="search-input-wrap">
-                    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" class="search-input" id="searchInput" placeholder="Поиск песен..." oninput="handleSearch()">
-                </div>
-                <select class="sort-select" id="sortSelect" onchange="handleSort()">
-                    <option value="title-asc">По названию (А–Я)</option>
-                    <option value="title-desc">По названию (Я–А)</option>
-                    <option value="author-asc">По автору (А–Я)</option>
-                    <option value="author-desc">По автору (Я–А)</option>
-                    <option value="date-new">Сначала новые</option>
-                    <option value="date-old">Сначала старые</option>
-                </select>
-            </div>
-            <div class="filter-tags" id="filterTags">
-                <button class="filter-tag active" onclick="filterByCategory('all', this)">Все</button>
-            </div>
-            <div class="results-count" id="resultsCount"></div>
-        </div>
-    </section>
-    <section class="songs-section">
-        <div class="songs-grid" id="songsGrid"></div>
-    </section>
-</div>
+  <!-- Баннер ошибки доступа Firestore (если не включен Test Mode в правилах) -->
+  <div id="firestoreErrorBanner" class="hidden bg-red-500/10 border-b border-red-500/30 px-4 py-3 text-xs text-red-300">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div>
+        <strong>Ошибка доступа к Cloud Firestore:</strong> убедитесь, что в консоли Firebase в разделе <code>Build &rarr; Firestore Database &rarr; Rules</code> разрешены чтение и запись: <code>allow read, write: if true;</code> (или включён <em>Test Mode</em>).
+      </div>
+    </div>
+  </div>
 
-<div class="page" id="page-chat">
-    <section class="chat-section">
-        <div class="chat-card">
-            <div class="chat-header">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" width="20" height="20"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                <h2>Общий чат</h2>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <div style="text-align:center;padding:30px;color:var(--text-lighter);">Нет сообщений</div>
-            </div>
-            <div id="chatLoginPrompt" style="padding:30px;text-align:center;">
-                <p style="color:var(--text-light);margin-bottom:14px;">Войдите, чтобы участвовать в чате</p>
-                <button class="auth-btn" onclick="openAuthModal()">Войти</button>
-            </div>
-            <div class="chat-input-area" id="chatInputArea" style="display:none;">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendChatMessage()">
-                <button class="chat-send" onclick="sendChatMessage()">Отпр.</button>
-            </div>
-        </div>
-    </section>
-</div>
+  <!-- Основной контент -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
-<div class="page" id="page-pm">
-    <section class="pm-section">
-        <div class="pm-container" id="pmContainer">
-            <div class="pm-sidebar" id="pmSidebar">
-                <div class="pm-sidebar-header">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" width="20" height="20"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                    <h3>Сообщения</h3>
-                </div>
-                <div class="pm-search-bar">
-                    <input type="text" class="pm-search-input" id="pmSearchInput" placeholder="Поиск пользователей..." oninput="loadPmDialogs()">
-                </div>
-                <div class="pm-dialogs" id="pmDialogs"></div>
-            </div>
-            <div class="pm-chat-area" id="pmChatArea" style="display:none;">
-                <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-lighter);">
-                    Выберите диалог
-                </div>
-            </div>
+    <!-- Метрики безопасности -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-gray-400">Всего сервисов в БД</p>
+          <p id="statTotal" class="text-2xl font-bold text-white mt-1">0</p>
         </div>
-        <div id="pmLoginPrompt" style="padding:30px;text-align:center;">
-            <p style="color:var(--text-light);margin-bottom:14px;">Войдите для личных сообщений</p>
-            <button class="auth-btn" onclick="openAuthModal()">Войти</button>
+        <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-database"></i>
         </div>
-    </section>
-</div>
+      </div>
 
-<!-- ADMIN PAGE -->
-<div class="page" id="page-admin">
-    <section class="admin-section">
-        <div class="admin-card">
-            <h2>👑 Административная панель</h2>
-            
-            <div style="margin-bottom:30px;">
-                <h3>➕ Добавить новую песню</h3>
-                <div class="form-group">
-                    <input type="text" id="adminTitle" class="form-input" placeholder="Название песни" style="margin-bottom:8px;">
-                    <input type="text" id="adminAuthor" class="form-input" placeholder="Автор" style="margin-bottom:8px;">
-                    <select id="adminCategory" class="form-input" style="margin-bottom:8px;">
-                        <option value="">Выберите категорию...</option>
-                    </select>
-                    <textarea id="adminLyrics" class="form-input" rows="4" placeholder="Текст песни..."></textarea>
-                    <button class="form-btn primary" onclick="addSong()" style="margin-top:8px;width:100%;">➕ Добавить песню</button>
-                </div>
-            </div>
-            
-            <div>
-                <h3>🎵 Управление песнями</h3>
-                <div id="adminSongsList">
-                    <p style="text-align:center;color:var(--text-lighter);">Загрузка...</p>
-                </div>
-            </div>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-gray-400">Индекс безопасности</p>
+          <p id="statScore" class="text-2xl font-bold text-emerald-400 mt-1">100%</p>
         </div>
-    </section>
-</div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+      </div>
 
-<!-- SONG MODAL -->
-<div class="modal-overlay" id="songModal">
-    <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <button class="modal-close" onclick="closeSongModal()">
-                <svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-gray-400">Скоро истекают (≤14 дн.)</p>
+          <p id="statSoon" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-gray-400">Просрочены (нужна смена)</p>
+          <p id="statExpired" class="text-2xl font-bold text-red-400 mt-1">0</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Поиск и фильтры -->
+    <section class="flex flex-wrap items-center justify-between gap-4 bg-gray-900/60 border border-gray-800 p-3 rounded-xl">
+      <div class="relative flex-1 min-w-[240px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+        <input id="searchInput" oninput="renderCards()" type="text" placeholder="Поиск по названию сервиса или логину..." class="w-full pl-9 pr-4 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500" />
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="filterStatus" onchange="renderCards()" class="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-emerald-500">
+          <option value="all">Все статусы</option>
+          <option value="ok">В норме</option>
+          <option value="soon">Скоро истекают</option>
+          <option value="expired">Просрочены</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Сетка карточек сервисов -->
+    <section id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></section>
+
+  </main>
+
+  <!-- Модальное окно добавления/редактирования -->
+  <div id="serviceModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-40 p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 id="modalTitle" class="text-lg font-bold text-white">Добавить сервис</h2>
+        <button onclick="closeAddModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="serviceForm" onsubmit="saveService(event)" class="space-y-3">
+        <input type="hidden" id="editId" />
+        <div>
+          <label class="text-xs text-gray-400">Название сервиса</label>
+          <input id="srvName" required type="text" placeholder="Например: GitHub, Telegram, Госуслуги" class="w-full mt-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white focus:border-emerald-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-400">Логин / Email</label>
+          <input id="srvLogin" required type="text" placeholder="user@example.com" class="w-full mt-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white focus:border-emerald-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-400">Пароль (шифруется AES-GCM перед отправкой в Firebase)</label>
+          <div class="flex gap-2 mt-1">
+            <input id="srvPassword" required type="text" placeholder="Введите или сгенерируйте пароль" class="flex-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white font-mono focus:border-emerald-500 focus:outline-none" />
+            <button type="button" onclick="fillGeneratedPassword()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg text-xs font-medium border border-gray-700" title="Сгенерировать надежный пароль">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
             </button>
-            <div>
-                <div class="modal-category" id="modalCategory"></div>
-                <h2 class="modal-title" id="modalTitle"></h2>
-                <div class="modal-author" id="modalAuthor"></div>
-            </div>
+          </div>
         </div>
-        <div class="modal-body">
-            <div class="modal-lyrics" id="modalLyrics"></div>
-            
-            <div class="edit-form-container" id="editFormContainer">
-                <h4 style="margin-bottom:12px;">✏️ Редактировать песню</h4>
-                <div class="form-group"><label class="form-label">Название</label><input type="text" class="form-input" id="editTitle"></div>
-                <div class="form-group"><label class="form-label">Автор</label><input type="text" class="form-input" id="editAuthor"></div>
-                <div class="form-group"><label class="form-label">Категория</label><select class="form-input" id="editCategory"></select></div>
-                <div class="form-group"><label class="form-label">Текст</label><textarea class="form-input" id="editLyrics" rows="6"></textarea></div>
-                <div style="display:flex;gap:8px;">
-                    <button class="form-btn primary" onclick="saveEditSong()">💾 Сохранить</button>
-                    <button class="form-btn secondary" onclick="cancelEditSong()">Отмена</button>
-                </div>
-            </div>
-            
-            <div id="adminModalButtons" style="display:none;margin-top:12px;display:flex;gap:8px;">
-                <button class="form-btn info" onclick="showEditForm()">✏️ Редактировать</button>
-                <button class="form-btn danger" onclick="deleteCurrentSong()">🗑️ Удалить</button>
-            </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-gray-400">Дата установки пароля</label>
+            <input id="srvDate" required type="date" class="w-full mt-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white focus:border-emerald-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-400">Срок ротации (дней)</label>
+            <select id="srvCycle" class="w-full mt-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white focus:border-emerald-500 focus:outline-none">
+              <option value="30">30 дней</option>
+              <option value="60">60 дней</option>
+              <option value="90" selected>90 дней</option>
+              <option value="180">180 дней</option>
+              <option value="365">365 дней</option>
+            </select>
+          </div>
         </div>
-        <div class="comments-section">
-            <div class="comments-list" id="commentsList"></div>
-            <div id="commentFormArea"></div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-lg text-xs bg-gray-800 text-gray-300 hover:bg-gray-700">Отмена</button>
+          <button type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white">Зашифровать и сохранить</button>
         </div>
+      </form>
     </div>
-</div>
+  </div>
 
-<!-- AUTH MODAL -->
-<div class="modal-overlay" id="authModal">
-    <div class="modal" onclick="event.stopPropagation()" style="max-width:440px;">
-        <div class="modal-header">
-            <button class="modal-close" onclick="closeAuthModal()">
-                <svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <h2 style="font-family:'Montserrat',sans-serif;color:#fff;font-size:1.3rem;">Вход / Регистрация</h2>
-        </div>
-        <div style="padding:20px;">
-            <div style="display:flex;border-bottom:2px solid #eee;margin-bottom:20px;">
-                <button class="auth-tab-btn active" onclick="switchAuthTab('login')" id="loginTabBtn">Вход</button>
-                <button class="auth-tab-btn" onclick="switchAuthTab('register')" id="registerTabBtn">Регистрация</button>
-            </div>
-            <div id="loginForm">
-                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="loginEmail" placeholder="Введите email"></div>
-                <div class="form-group"><label class="form-label">Пароль</label><input type="password" class="form-input" id="loginPassword" placeholder="Введите пароль" onkeypress="if(event.key==='Enter')login()"></div>
-                <button class="form-btn primary" onclick="login()" style="width:100%;">Войти</button>
-            </div>
-            <div id="registerForm" style="display:none;">
-                <div class="form-group"><label class="form-label">Имя пользователя</label><input type="text" class="form-input" id="regUsername" placeholder="Придумайте имя"></div>
-                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="regEmail" placeholder="Введите email"></div>
-                <div class="form-group"><label class="form-label">Пароль</label><input type="password" class="form-input" id="regPassword" placeholder="Минимум 6 символов" onkeypress="if(event.key==='Enter')register()"></div>
-                <button class="form-btn primary" onclick="register()" style="width:100%;">Зарегистрироваться</button>
-            </div>
-        </div>
-    </div>
-</div>
+  <!-- Уведомление (Toast) -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 border border-emerald-500/40 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs flex items-center gap-2 opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg">Скопировано</span>
+  </div>
 
-<!-- PROFILE MODAL -->
-<div class="modal-overlay" id="profileModal">
-    <div class="modal" onclick="event.stopPropagation()" style="max-width:500px;">
-        <div class="modal-header">
-            <button class="modal-close" onclick="closeProfileModal()">
-                <svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <h2 style="font-family:'Montserrat',sans-serif;color:#fff;font-size:1.3rem;">Настройки профиля</h2>
-        </div>
-        <div style="padding:20px;">
-            <div class="profile-avatar-section">
-                <div class="profile-avatar-large" id="profileAvatar" onclick="document.getElementById('avatarInput').click()">
-                    <div class="profile-avatar-overlay">
-                        <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group"><label class="form-label">Имя пользователя</label><input type="text" class="form-input" id="profileName" placeholder="Ваше имя"></div>
-            <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="profileEmail" disabled style="opacity:0.7;"></div>
-            <div class="profile-success" id="profileSuccess">✅ Профиль сохранён!</div>
-            <button class="form-btn primary" onclick="saveProfile()" style="width:100%;">💾 Сохранить изменения</button>
-        </div>
-    </div>
-</div>
+  <!-- Подключение Firebase SDK и Web Crypto API -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav" id="bottomNav">
-    <button class="bottom-nav-item active" onclick="switchPage('songs', this)" data-page="songs">
-        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        Песни
-    </button>
-    <button class="bottom-nav-item" onclick="switchPage('chat', this)" data-page="chat">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        Чат
-    </button>
-    <button class="bottom-nav-item" onclick="switchPage('pm', this)" data-page="pm">
-        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-        ЛС
-    </button>
-    <button class="bottom-nav-item admin-only" id="bottomAdminBtn" onclick="switchPage('admin', this)" data-page="admin" style="display:none;">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        Админ
-    </button>
-</nav>
+    // Конфигурация твоего проекта secuvault-db
+    const firebaseConfig = {
+      apiKey: "AIzaSyD6Y8BMrLiSPEfIQQEydd4hasLx4CijDMo",
+      authDomain: "secuvault-db.firebaseapp.com",
+      projectId: "secuvault-db",
+      storageBucket: "secuvault-db.firebasestorage.app",
+      messagingSenderId: "1029744350348",
+      appId: "1:1029744350348:web:1562d89d0e2cc71eda17a9",
+      measurementId: "G-E260RXFGN8"
+    };
 
-<footer>
-    <div class="footer-logo">Молодежь Церкви <span>Живое Слово</span></div>
-</footer>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const COLLECTION_NAME = "vault_entries";
 
-<div class="toast-container" id="toastContainer"></div>
+    let rawEntries = [];       // Зашифрованные документы из Firestore
+    let decryptedEntries = []; // Расшифрованные объекты в памяти
+    let currentMasterPassword = null;
+    let unsubscribeSnapshot = null;
 
-<input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
+    // ==========================================
+    // БЛОК КРИПТОГРАФИИ (Web Crypto API AES-GCM)
+    // ==========================================
+    const enc = new TextEncoder();
+    const dec = new TextDecoder();
 
-<script>
-    // ===== FIREBASE =====
-    try {
-        firebase.initializeApp({
-            apiKey: "AIzaSyBJBXj7AMDEFDKZaMLxuvzdd_Zdc1QX5yU",
-            authDomain: "christian-songbook-app.firebaseapp.com",
-            projectId: "christian-songbook-app",
-            storageBucket: "christian-songbook-app.firebasestorage.app",
-            messagingSenderId: "784201073587",
-            appId: "1:784201073587:web:a05150b87033fcfd57c1c6"
-        });
-    } catch(e) { console.log('Firebase already initialized'); }
-    
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    const storage = firebase.storage();
-    
-    // Enable offline persistence for Firestore
-    db.enablePersistence({ synchronizeTabs: true })
-        .catch(err => {
-            if (err.code === 'failed-precondition') {
-                console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-            } else if (err.code === 'unimplemented') {
-                console.log('The current browser does not support all of the features required to enable persistence');
-            }
-        });
-    
-    // ===== STATE =====
-    const ADMIN_EMAILS = ["kpprevkponaog@gmail.com", "dinaprotsyuk@list.ru", "n@gmail.com"];
-    let currentUser = null;
-    let isAdmin = false;
-    let currentSongId = null;
-    let currentFilter = 'all';
-    let currentSearch = '';
-    let currentSort = 'title-asc';
-    let currentPmUser = null;
-    let categories = ["Рождество","Пасха","Жатва","Троица","Свадьба","Семейные","Новый год","Прочее" ];
-    let isOnline = navigator.onLine;
-    let localSongsCache = [];
-    let syncInProgress = false;
-    
-    // ===== IMPROVED OFFLINE HANDLING =====
-    const offlineIndicator = document.getElementById('offlineIndicator');
-    const offlineIndicatorText = document.getElementById('offlineIndicatorText');
-    const offlineRetryBtn = document.getElementById('offlineRetryBtn');
-    
-    function showOfflineIndicator(type, message, showRetry = false) {
-        offlineIndicator.classList.add('show');
-        offlineIndicator.classList.remove('online', 'syncing');
-        
-        const iconSpan = offlineIndicator.querySelector('.indicator-icon');
-        
-        if (type === 'offline') {
-            offlineIndicator.style.background = '#c0392b';
-            iconSpan.textContent = '📡';
-            offlineIndicatorText.textContent = message || 'Нет соединения с интернетом. Данные из кеша.';
-            offlineRetryBtn.style.display = showRetry ? 'flex' : 'none';
-        } else if (type === 'online') {
-            offlineIndicator.style.background = '#2c7a4d';
-            iconSpan.textContent = '✅';
-            offlineIndicatorText.textContent = message || 'Интернет восстановлен. Данные синхронизируются...';
-            offlineRetryBtn.style.display = 'none';
-            
-            // Auto-hide after 3 seconds for online success
-            setTimeout(() => {
-                if (navigator.onLine && offlineIndicator.classList.contains('show') && !syncInProgress) {
-                    offlineIndicator.classList.remove('show');
-                }
-            }, 3000);
-        } else if (type === 'syncing') {
-            offlineIndicator.style.background = '#d4a017';
-            iconSpan.textContent = '🔄';
-            offlineIndicatorText.textContent = message || 'Синхронизация данных...';
-            offlineRetryBtn.style.display = 'none';
-        }
+    function bufToBase64(buf) {
+      return btoa(String.fromCharCode(...new Uint8Array(buf)));
     }
-    
-    function hideOfflineIndicator() {
-        if (navigator.onLine && !syncInProgress) {
-            offlineIndicator.classList.remove('show');
-        }
-    }
-    
-    // Manual retry
-    offlineRetryBtn.addEventListener('click', () => {
-        if (!navigator.onLine) {
-            showOfflineIndicator('offline', 'Нет соединения. Проверьте интернет.', true);
-        } else {
-            showOfflineIndicator('syncing', 'Повторная синхронизация...');
-            syncDataAfterReconnect();
-        }
-    });
-    
-    async function syncDataAfterReconnect() {
-        if (!navigator.onLine) return;
-        syncInProgress = true;
-        showOfflineIndicator('syncing', 'Синхронизация данных...');
-        
-        try {
-            await loadSongs();
-            await cacheCategoriesLocally();
-            await cacheSongsLocally();
-            
-            // Reload current page data
-            if (document.getElementById('page-songs').classList.contains('active')) {
-                renderSongs();
-            }
-            if (document.getElementById('page-chat').classContains('active')) {
-                initChat();
-            }
-            
-            showOfflineIndicator('online', '✅ Синхронизация завершена!');
-            setTimeout(() => {
-                if (navigator.onLine) {
-                    offlineIndicator.classList.remove('show');
-                }
-                syncInProgress = false;
-            }, 2000);
-        } catch(e) {
-            console.error('Sync error:', e);
-            showOfflineIndicator('offline', 'Ошибка синхронизации. Некоторые функции могут быть ограничены.', true);
-            syncInProgress = false;
-        }
-    }
-    
-    function updateOfflineStatus() {
-        if (navigator.onLine) {
-            console.log('Back online, syncing...');
-            syncDataAfterReconnect();
-        } else {
-            showOfflineIndicator('offline', 'Нет соединения с интернетом. Песни доступны из кеша.', true);
-        }
-    }
-    
-    window.addEventListener('online', updateOfflineStatus);
-    window.addEventListener('offline', () => {
-        showOfflineIndicator('offline', 'Нет соединения с интернетом. Песни доступны из кеша.', true);
-    });
-    
-    // Cache songs to localStorage for offline access
-    async function cacheSongsLocally() {
-        try {
-            const snap = await db.collection('songs').get();
-            const songs = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            localStorage.setItem('cached_songs', JSON.stringify(songs));
-            localSongsCache = songs;
-            console.log('Songs cached locally:', songs.length);
-            return songs;
-        } catch(e) {
-            console.log('Failed to cache songs, using existing cache');
-            const cached = localStorage.getItem('cached_songs');
-            if (cached) {
-                localSongsCache = JSON.parse(cached);
-                return localSongsCache;
-            }
-            return [];
-        }
-    }
-    
-    function getCachedSongs() {
-        const cached = localStorage.getItem('cached_songs');
-        if (cached) {
-            localSongsCache = JSON.parse(cached);
-            return localSongsCache;
-        }
-        return [];
-    }
-    
-    // Cache categories
-    async function cacheCategoriesLocally() {
-        try {
-            const doc = await db.collection('settings').doc('categories').get();
-            if (doc.exists && doc.data().list) {
-                categories = doc.data().list;
-                localStorage.setItem('cached_categories', JSON.stringify(categories));
-            }
-        } catch(e) {
-            const cached = localStorage.getItem('cached_categories');
-            if (cached) {
-                categories = JSON.parse(cached);
-            }
-        }
-        updateFilterTags();
-        updateCategorySelects();
-    }
-    
-    // ===== UTILS =====
-    function showToast(msg, type) {
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div');
-        t.className = 'toast ' + type;
-        t.textContent = msg;
-        c.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
-    }
-    
-    function getInitials(name) {
-        if (!name) return '??';
-        return name.trim().split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
-    }
-    
-    function getAvatarColor(name) {
-        const colors = ['#c9a84c','#1a2a4a','#4a8c5c','#3a7bd5','#c0392b','#8e44ad'];
-        let hash = 0;
-        for (let i = 0; i < (name || 'User').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
-        return colors[Math.abs(hash) % colors.length];
-    }
-    
-    function renderAvatar(name, size, photoURL) {
-        if (photoURL) {
-            return `<div class="user-avatar" style="width:${size};height:${size};background-image:url('${photoURL}');background-size:cover;background-position:center;"></div>`;
-        }
-        const color = getAvatarColor(name);
-        const initials = getInitials(name);
-        return `<div class="user-avatar initials-avatar" style="background:${color};width:${size};height:${size};font-size:${parseInt(size)*0.35}px;">${initials}</div>`;
-    }
-    
-    function escHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
-    }
-    
-    function formatTime(ts) {
-        if (!ts) return '';
-        return new Date(ts).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
-    }
-    
-    function timeAgo(ts) {
-        if (!ts) return '';
-        const sec = Math.floor((Date.now() - ts) / 1000);
-        if (sec < 60) return 'только что';
-        if (sec < 3600) return Math.floor(sec/60) + ' мин.';
-        if (sec < 86400) return Math.floor(sec/3600) + ' ч.';
-        return new Date(ts).toLocaleDateString('ru-RU');
-    }
-    
-    function getUserName() {
-        if (!currentUser) return 'Гость';
-        return currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'User');
-    }
-    
-    function getUserPhoto() {
-        return currentUser ? currentUser.photoURL : null;
-    }
-    
-    // ===== CATEGORIES =====
-    async function loadCategories() {
-        try {
-            const doc = await db.collection('settings').doc('categories').get();
-            if (doc.exists && doc.data().list) {
-                categories = doc.data().list;
-            } else {
-                await db.collection('settings').doc('categories').set({list: categories});
-            }
-            localStorage.setItem('cached_categories', JSON.stringify(categories));
-        } catch(e) {
-            console.log('Offline mode: using cached categories');
-            const cached = localStorage.getItem('cached_categories');
-            if (cached) categories = JSON.parse(cached);
-        }
-        updateFilterTags();
-        updateCategorySelects();
-    }
-    
-    async function saveCategories() {
-        try {
-            await db.collection('settings').doc('categories').set({list: categories});
-            localStorage.setItem('cached_categories', JSON.stringify(categories));
-        } catch(e) { console.error('Error:', e); }
-    }
-    
-    function updateFilterTags() {
-        const container = document.getElementById('filterTags');
-        if (!container) return;
-        container.innerHTML = '<button class="filter-tag active" onclick="filterByCategory(\'all\', this)">Все</button>' +
-            categories.map(cat => `<button class="filter-tag" onclick="filterByCategory('${cat}', this)">${cat.charAt(0).toUpperCase() + cat.slice(1)}</button>`).join('');
-    }
-    
-    function updateCategorySelects() {
-        ['adminCategory', 'editCategory'].forEach(id => {
-            const sel = document.getElementById(id);
-            if (sel) sel.innerHTML = '<option value="">Выберите категорию...</option>' + 
-                categories.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('');
-        });
-    }
-    
-    // ===== NAVIGATION =====
-    function switchPage(page, btn) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        const pageEl = document.getElementById('page-' + page);
-        if (pageEl) pageEl.classList.add('active');
-        
-        document.querySelectorAll('.nav-desktop .nav-link').forEach(l => l.classList.remove('active'));
-        if (btn && btn.classList.contains('nav-link')) btn.classList.add('active');
-        
-        document.querySelectorAll('.bottom-nav-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('data-page') === page) item.classList.add('active');
-        });
-        
-        document.getElementById('heroSection').style.display = (page === 'songs') ? '' : 'none';
-        window.scrollTo(0, 0);
-        
-        if (page === 'songs') renderSongs();
-        if (page === 'chat' && navigator.onLine) initChat();
-        if (page === 'pm') initPm();
-        if (page === 'admin' && isAdmin) { loadAdminData(); loadCategoriesList(); }
-    }
-    
-    function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
-    
-    document.addEventListener('click', function(e) {
-        const dd = document.getElementById('userDropdown');
-        if (dd && dd.classList.contains('show') && !e.target.closest('.user-badge')) {
-            dd.classList.remove('show');
-        }
-    }); 
-    
-    // ===== SONGS with OFFLINE SUPPORT =====
-    async function loadSongs() {
-        if (navigator.onLine) {
-            try {
-                const snap = await db.collection('songs').get();
-                if (snap.empty) {
-                    const initial = [
-                        {id:"song_1",title:"Ты — мой Бог",author:"Даниил",category:"поклонение",date:"2025-09-15",preview:"Ты мой Бог, и я прославляю Тебя...",lyrics:"Ты мой Бог, и я прославляю Тебя...\n\nПрипев:\nТы мой Бог, и я прославляю Тебя,\nТы мой Царь, и я поклоняюсь Тебе."},
-                        {id:"song_2",title:"Свят, свят, свят",author:"Молодёжная группа «Свет»",category:"хвала",date:"2025-08-20",preview:"Свят, свят, свят Господь Вседержитель...",lyrics:"Свят, свят, свят — Господь Вседержитель...\n\nПрипев:\nСвят, свят, свят — Господь Вседержитель,\nСвят, свят, свят — наш Небесный Отец."},
-                        {id:"song_3",title:"Благодарю Тебя, Господь",author:"Анна К.",category:"благодарение",date:"2025-11-02",preview:"Благодарю Тебя за каждый день...",lyrics:"Благодарю Тебя, Господь,\nЗа каждый день, за каждый миг."},
-                        {id:"song_4",title:"Я посвящаю себя Тебе",author:"Группа «Новая Жизнь»",category:"посвящение",date:"2025-07-10",preview:"Возьми мою жизнь...",lyrics:"Я посвящаю себя Тебе, Господь,\nВозьми мою жизнь, я отдаю её Тебе."},
-                        {id:"song_5",title:"Надежда жива",author:"Марк и Елизавета",category:"надежда",date:"2025-10-28",preview:"Даже когда всё рушится — надежда жива...",lyrics:"Надежда жива, надежда жива!\nХристос воскрес — и смерть побеждена."}
-                    ];
-                    for (const s of initial) await db.collection('songs').doc(s.id).set(s);
-                }
-                await cacheSongsLocally();
-                renderSongs();
-            } catch(e) { 
-                console.error('Error loading from network:', e);
-                renderSongs(true);
-                showOfflineIndicator('offline', 'Ошибка сети. Используется кеш песен.', true);
-            }
-        } else {
-            renderSongs(true);
-        }
-    }
-    
-    async function renderSongs(useCache = false) {
-        let songs = [];
-        
-        if (useCache || !navigator.onLine) {
-            songs = getCachedSongs();
-            if (songs.length === 0) {
-                document.getElementById('songsGrid').innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-lighter);">Нет сохранённых песен. Подключитесь к интернету для загрузки.</p>';
-                document.getElementById('resultsCount').innerHTML = 'Нет песен офлайн';
-                return;
-            }
-        } else {
-            try {
-                let query = db.collection('songs');
-                if (currentFilter !== 'all') query = query.where('category', '==', currentFilter);
-                const snap = await query.get();
-                songs = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                await cacheSongsLocally();
-            } catch(e) {
-                console.error('Error:', e);
-                songs = getCachedSongs();
-            }
-        }
-        
-        if (currentSearch) {
-            const s = currentSearch.toLowerCase();
-            songs = songs.filter(x => (x.title||'').toLowerCase().includes(s) || (x.author||'').toLowerCase().includes(s));
-        }
-        
-        const [key, dir] = currentSort.split('-');
-        songs.sort((a,b) => {
-            let va, vb;
-            if (key === 'title') { va = (a.title||'').toLowerCase(); vb = (b.title||'').toLowerCase(); }
-            else if (key === 'author') { va = (a.author||'').toLowerCase(); vb = (b.author||'').toLowerCase(); }
-            else { va = new Date(a.date||0); vb = new Date(b.date||0); }
-            return (va < vb ? -1 : 1) * (dir === 'asc' ? 1 : -1);
-        });
-        
-        const grid = document.getElementById('songsGrid');
-        grid.innerHTML = songs.length === 0 ? '<p style="text-align:center;padding:40px;grid-column:1/-1;">Песни не найдены</p>' :
-            songs.map(s => `
-                <div class="song-card">
-                    ${isAdmin ? `<div class="admin-actions">
-                        <button class="admin-btn edit" onclick="event.stopPropagation();openSongModal('${s.id}');setTimeout(showEditForm,300);">✏️</button>
-                        <button class="admin-btn delete" onclick="event.stopPropagation();deleteSong('${s.id}')">🗑️</button>
-                    </div>` : ''}
-                    <div class="song-card-header" onclick="openSongModal('${s.id}')">
-                        <div class="song-category-badge">${escHtml(s.category||'')}</div>
-                        <div class="song-card-title">${escHtml(s.title||'')}</div>
-                        <div class="song-card-author">${escHtml(s.author||'')}</div>
-                    </div>
-                    <div class="song-card-body" onclick="openSongModal('${s.id}')">
-                        <div class="song-preview">${escHtml(s.preview||(s.lyrics||'').substring(0,100))}</div>
-                    </div>
-                    <div class="song-card-footer">
-                        <span class="song-date">${s.date||''}</span>
-                        <button class="song-open-btn" onclick="event.stopPropagation();openSongModal('${s.id}')">Открыть</button>
-                    </div>
-                </div>
-            `).join('');
-        
-        document.getElementById('resultsCount').innerHTML = 'Найдено <strong>' + songs.length + '</strong> песен';
-        document.getElementById('statSongs').textContent = songs.length;
-        document.getElementById('statCategories').textContent = categories.length;
-    }
-    
-    async function openSongModal(songId) {
-        let song = null;
-        const cached = getCachedSongs();
-        song = cached.find(s => s.id === songId);
-        
-        if (!song && navigator.onLine) {
-            try {
-                const doc = await db.collection('songs').doc(songId).get();
-                if (doc.exists) song = doc.data();
-            } catch(e) { console.error('Error:', e); }
-        }
-        
-        if (!song) {
-            showToast('Песня не найдена', 'error');
-            return;
-        }
-        
-        currentSongId = songId;
-        
-        document.getElementById('modalCategory').textContent = song.category || '';
-        document.getElementById('modalTitle').textContent = song.title || '';
-        document.getElementById('modalAuthor').textContent = song.author || '';
-        document.getElementById('modalLyrics').innerHTML = (song.lyrics||'').replace(/\n/g, '<br>');
-        
-        document.getElementById('editFormContainer').classList.remove('active');
-        document.getElementById('adminModalButtons').style.display = isAdmin ? 'flex' : 'none';
-        
-        if (navigator.onLine) await loadComments(songId);
-        else document.getElementById('commentsList').innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-lighter);">Комментарии доступны онлайн</p>';
-        
-        document.getElementById('songModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    async function loadComments(songId) {
-        try {
-            const snap = await db.collection('comments').where('songId','==',songId).orderBy('timestamp','desc').get();
-            const comments = snap.docs.map(d => ({id:d.id,...d.data()}));
-            
-            const list = document.getElementById('commentsList');
-            list.innerHTML = comments.length === 0 ? '<p style="text-align:center;padding:16px;color:var(--text-lighter);">Нет комментариев</p>' :
-                comments.map(c => `
-                    <div class="comment-item">
-                        <div class="comment-avatar">${renderAvatar(c.username||'User','34px')}</div>
-                        <div class="comment-body">
-                            <div class="comment-author">${escHtml(c.username||'User')} · ${timeAgo(c.timestamp)}</div>
-                            <div class="comment-text">${escHtml(c.text||'')}</div>
-                        </div>
-                        ${(currentUser && (currentUser.uid===c.userId||isAdmin)) ? `<button onclick="deleteComment('${c.id}')" style="background:none;border:none;cursor:pointer;opacity:0.5;">✕</button>` : ''}
-                    </div>
-                `).join('');
-            
-            document.getElementById('commentFormArea').innerHTML = currentUser ? `
-                <div class="comment-form" style="margin-top:12px;">
-                    <input type="text" class="comment-input" id="commentInput" placeholder="Комментарий..." onkeypress="if(event.key==='Enter')submitComment()">
-                    <button class="comment-submit" onclick="submitComment()">Отпр.</button>
-                </div>` : '<p style="text-align:center;color:var(--text-lighter);"><a onclick="closeSongModal();openAuthModal();" style="color:var(--gold-dark);cursor:pointer;">Войдите</a>, чтобы комментировать</p>';
-        } catch(e) { console.error('Error:', e); }
-    }
-    
-    async function submitComment() {
-        if (!navigator.onLine) {
-            showToast('Комментарии доступны только онлайн', 'error');
-            return;
-        }
-        const input = document.getElementById('commentInput');
-        if (!input || !currentUser || !currentSongId) return;
-        const text = input.value.trim();
-        if (!text) return;
-        try {
-            await db.collection('comments').add({songId:currentSongId,userId:currentUser.uid,username:getUserName(),text,timestamp:Date.now()});
-            input.value = '';
-            await loadComments(currentSongId);
-        } catch(e) { console.error('Error:', e); }
-    }
-    
-    async function deleteComment(id) { await db.collection('comments').doc(id).delete(); await loadComments(currentSongId); }
-    
-    function showEditForm() {
-        const form = document.getElementById('editFormContainer');
-        form.classList.add('active');
-        form.scrollIntoView({behavior:'smooth'});
-        document.getElementById('editTitle').value = document.getElementById('modalTitle').textContent;
-        document.getElementById('editAuthor').value = document.getElementById('modalAuthor').textContent;
-        document.getElementById('editCategory').value = document.getElementById('modalCategory').textContent;
-        document.getElementById('editLyrics').value = document.getElementById('modalLyrics').innerHTML.replace(/<br>/g,'\n').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
-        updateCategorySelects();
-    }
-    
-    function cancelEditSong() { document.getElementById('editFormContainer').classList.remove('active'); }
-    
-    async function saveEditSong() {
-        if (!navigator.onLine) {
-            showToast('Редактирование доступно только онлайн', 'error');
-            return;
-        }
-        const title = document.getElementById('editTitle').value.trim();
-        const author = document.getElementById('editAuthor').value.trim();
-        const category = document.getElementById('editCategory').value;
-        const lyrics = document.getElementById('editLyrics').value.trim();
-        if (!title || !lyrics || !category) { showToast('Заполните все поля', 'error'); return; }
-        try {
-            await db.collection('songs').doc(currentSongId).update({title,author,category,lyrics,preview:lyrics.substring(0,100)});
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalAuthor').textContent = author;
-            document.getElementById('modalCategory').textContent = category;
-            document.getElementById('modalLyrics').innerHTML = lyrics.replace(/\n/g,'<br>');
-            document.getElementById('editFormContainer').classList.remove('active');
-            showToast('Обновлено!','success');
-            await cacheSongsLocally();
-            renderSongs();
-        } catch(e) { showToast('Ошибка','error'); }
-    }
-    
-    async function deleteCurrentSong() { if (confirm('Удалить?')) { await deleteSong(currentSongId); closeSongModal(); } }
-    
-    async function deleteSong(id) {
-        if (!navigator.onLine) {
-            showToast('Удаление доступно только онлайн', 'error');
-            return;
-        }
-        try {
-            await db.collection('songs').doc(id).delete();
-            const snap = await db.collection('comments').where('songId','==',id).get();
-            for (const d of snap.docs) await d.ref.delete();
-            showToast('Удалено','success');
-            await cacheSongsLocally();
-            renderSongs();
-            if (isAdmin) loadAdminData();
-        } catch(e) { showToast('Ошибка','error'); }
-    }
-    
-    function closeSongModal() {
-        document.getElementById('songModal').classList.remove('active');
-        document.body.style.overflow = '';
-        currentSongId = null;
-    }
-    document.getElementById('songModal').addEventListener('click', function(e) { if (e.target === this) closeSongModal(); });
-    
-    function filterByCategory(cat, btn) {
-        currentFilter = cat;
-        document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        renderSongs();
-    }
-    function handleSearch() { currentSearch = document.getElementById('searchInput').value; renderSongs(); }
-    function handleSort() { currentSort = document.getElementById('sortSelect').value; renderSongs(); }
-    
-    // ===== ADMIN =====
-    async function addSong() {
-        if (!navigator.onLine) {
-            showToast('Добавление песен доступно только онлайн', 'error');
-            return;
-        }
-        const title = document.getElementById('adminTitle').value.trim();
-        const author = document.getElementById('adminAuthor').value.trim();
-        const category = document.getElementById('adminCategory').value;
-        const lyrics = document.getElementById('adminLyrics').value.trim();
-        
-        if (!title || !author || !category || !lyrics) { 
-            showToast('Заполните все поля', 'error'); 
-            return; 
-        }
-        
-        if (!categories.includes(category)) {
-            showToast('Выберите существующую категорию', 'error');
-            return;
-        }
-        
-        try {
-            const id = 'song_' + Date.now();
-            await db.collection('songs').doc(id).set({
-                id: id,
-                title: title,
-                author: author,
-                category: category,
-                date: new Date().toISOString().split('T')[0],
-                preview: lyrics.substring(0, 100),
-                lyrics: lyrics
-            });
-            
-            document.getElementById('adminTitle').value = '';
-            document.getElementById('adminAuthor').value = '';
-            document.getElementById('adminLyrics').value = '';
-            document.getElementById('adminCategory').value = '';
-            
-            showToast('Песня добавлена!', 'success');
-            await cacheSongsLocally();
-            loadAdminData();
-            renderSongs();
-        } catch(e) { 
-            console.error('Error:', e);
-            showToast('Ошибка при добавлении: ' + e.message, 'error'); 
-        }
-    }
-    
-    async function loadAdminData() {
-        try {
-            const snap = await db.collection('songs').get();
-            const songs = snap.docs.map(d => ({id:d.id,...d.data()}));
-            document.getElementById('adminSongsList').innerHTML = songs.length === 0 ? '<p style="text-align:center;color:var(--text-lighter);">Нет песен</p>' :
-                songs.map(s => `<div class="admin-song-item">
-                    <div><strong>${escHtml(s.title)}</strong><br><small>${escHtml(s.author)} | ${s.category}</small></div>
-                    <div style="display:flex;gap:6px;">
-                        <button class="form-btn info" onclick="openSongModal('${s.id}');setTimeout(showEditForm,300);" style="padding:8px 12px;">✏️</button>
-                        <button class="form-btn danger" onclick="deleteSong('${s.id}')" style="padding:8px 12px;">🗑️</button>
-                    </div>
-                </div>`).join('');
-        } catch(e) { console.error('Error:', e); }
-    }
-    
-    async function loadCategoriesList() {
-        document.getElementById('categoriesList').innerHTML = categories.length === 0 ? '<p style="text-align:center;color:var(--text-lighter);">Нет категорий</p>' :
-            categories.map((cat, i) => `
-                <div class="category-item" id="cat-item-${i}">
-                    <div><strong>${cat.charAt(0).toUpperCase() + cat.slice(1)}</strong></div>
-                    <div style="display:flex;gap:6px;">
-                        <button class="form-btn info" onclick="showEditCategory(${i})" style="padding:6px 10px;font-size:0.8rem;">✏️</button>
-                        <button class="form-btn danger" onclick="deleteCategory(${i})" style="padding:6px 10px;font-size:0.8rem;">🗑️</button>
-                    </div>
-                </div>
-                <div class="category-edit-form" id="cat-edit-${i}" style="padding:10px;">
-                    <input type="text" class="form-input" id="cat-edit-input-${i}" value="${cat}" style="flex:1;">
-                    <button class="form-btn primary" onclick="saveEditCategory(${i})" style="padding:8px 12px;">💾</button>
-                    <button class="form-btn secondary" onclick="hideEditCategory(${i})" style="padding:8px 12px;">Отмена</button>
-                </div>
-            `).join('');
-    }
-    
-    async function addCategory() {
-        const name = document.getElementById('newCategoryName').value.trim().toLowerCase();
-        if (!name) { 
-            showToast('Введите название', 'error'); 
-            return; 
-        }
-        if (categories.includes(name)) { 
-            showToast('Категория уже существует', 'error'); 
-            return; 
-        }
-        
-        try {
-            categories.push(name);
-            await saveCategories();
-            
-            updateFilterTags();
-            updateCategorySelects();
-            loadCategoriesList();
-            document.getElementById('newCategoryName').value = '';
-            document.getElementById('statCategories').textContent = categories.length;
-            
-            showToast('Категория "' + name + '" добавлена!', 'success');
-        } catch(e) {
-            console.error('Error:', e);
-            showToast('Ошибка при добавлении категории', 'error');
-        }
-    }
-    
-    function showEditCategory(i) { document.getElementById('cat-edit-'+i).classList.add('active'); }
-    function hideEditCategory(i) { document.getElementById('cat-edit-'+i).classList.remove('active'); }
-    
-    async function saveEditCategory(i) {
-        const nameInput = document.getElementById('cat-edit-input-' + i);
-        if (!nameInput) return;
-        
-        const name = nameInput.value.trim().toLowerCase();
-        if (!name) { 
-            showToast('Введите название', 'error'); 
-            return; 
-        }
-        if (categories.includes(name) && categories[i] !== name) { 
-            showToast('Категория уже существует', 'error'); 
-            return; 
-        }
-        
-        const oldName = categories[i];
-        
-        try {
-            categories[i] = name;
-            
-            if (navigator.onLine) {
-                const batch = db.batch();
-                const snap = await db.collection('songs').where('category', '==', oldName).get();
-                if (!snap.empty) {
-                    snap.docs.forEach(doc => {
-                        batch.update(doc.ref, { category: name });
-                    });
-                    await batch.commit();
-                }
-            }
-            
-            await saveCategories();
-            updateFilterTags();
-            updateCategorySelects();
-            loadCategoriesList();
-            hideEditCategory(i);
-            await cacheSongsLocally();
-            renderSongs();
-            
-            showToast('Категория обновлена!', 'success');
-        } catch(e) { 
-            console.error('Error:', e);
-            showToast('Ошибка при обновлении категории', 'error');
-        }
-    }
-    
-    async function deleteCategory(i) {
-        const cat = categories[i];
-        if (!confirm(`Удалить "${cat}"?`)) return;
-        try {
-            if (navigator.onLine) {
-                const snap = await db.collection('songs').where('category','==',cat).get();
-                for (const d of snap.docs) await d.ref.update({category: ''});
-            }
-            categories.splice(i, 1);
-            await saveCategories();
-            updateFilterTags();
-            updateCategorySelects();
-            loadCategoriesList();
-            await cacheSongsLocally();
-            renderSongs();
-            document.getElementById('statCategories').textContent = categories.length;
-            showToast('Удалено','success');
-        } catch(e) { console.error('Error:', e); }
-    }
-    
-    async function saveCategories() {
-        try {
-            await db.collection('settings').doc('categories').set({
-                list: categories,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            localStorage.setItem('cached_categories', JSON.stringify(categories));
-            console.log('Categories saved successfully:', categories);
-        } catch(e) { 
-            console.error('Error saving categories:', e);
-            localStorage.setItem('cached_categories', JSON.stringify(categories));
-        }
-    }
-    
-    // ===== PROFILE =====
-    function openProfileModal() {
-        if (!currentUser) return;
-        document.getElementById('profileName').value = getUserName();
-        document.getElementById('profileEmail').value = currentUser.email || '';
-        const avatarHtml = renderAvatar(getUserName(), '90px', getUserPhoto());
-        document.getElementById('profileAvatar').innerHTML = avatarHtml;
-        document.getElementById('profileAvatar').className = getUserPhoto() ? 'profile-avatar-large' : 'profile-avatar-large initials-avatar';
-        document.getElementById('profileModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-    function closeProfileModal() { document.getElementById('profileModal').classList.remove('active'); document.body.style.overflow = ''; }
-    document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target === this) closeProfileModal(); });
-    
-    async function saveProfile() {
-        const name = document.getElementById('profileName').value.trim();
-        if (!name) { showToast('Введите имя','error'); return; }
-        try {
-            await currentUser.updateProfile({displayName: name});
-            await db.collection('users').doc(currentUser.uid).update({username: name});
-            document.getElementById('profileSuccess').classList.add('show');
-            setTimeout(() => document.getElementById('profileSuccess').classList.remove('show'), 3000);
-            updateUI(currentUser);
-            showToast('Сохранено!','success');
-        } catch(e) { showToast('Ошибка','error'); }
-    }
-    
-    async function uploadAvatar(e) {
-        const file = e.target.files[0];
-        if (!file || !currentUser) return;
-        if (!navigator.onLine) {
-            showToast('Загрузка фото доступна только онлайн', 'error');
-            return;
-        }
-        try {
-            const ref = storage.ref().child('avatars/' + currentUser.uid);
-            await ref.put(file);
-            const url = await ref.getDownloadURL();
-            await currentUser.updateProfile({photoURL: url});
-            document.getElementById('profileAvatar').innerHTML = renderAvatar(getUserName(), '90px', url);
-            document.getElementById('profileAvatar').className = 'profile-avatar-large';
-            updateUI(currentUser);
-            showToast('Фото обновлено!','success');
-        } catch(e) { showToast('Ошибка','error'); }
-        e.target.value = '';
-    }
-    
-    // ===== CHAT & PM =====
-    function initChat() {
-        if (!navigator.onLine) {
-            document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-lighter);">Чат доступен только онлайн</div>';
-            document.getElementById('chatInputArea').style.display = 'none';
-            return;
-        }
-        db.collection('chat').orderBy('timestamp','asc').onSnapshot(snap => {
-            const msgs = snap.docs.map(d => ({id:d.id,...d.data()}));
-            renderChat(msgs);
-        });
-    }
-    
-    function renderChat(msgs) {
-        const inputArea = document.getElementById('chatInputArea');
-        const loginPrompt = document.getElementById('chatLoginPrompt');
-        if (currentUser) { inputArea.style.display = 'flex'; loginPrompt.style.display = 'none'; }
-        else { inputArea.style.display = 'none'; loginPrompt.style.display = 'block'; }
-        
-        const container = document.getElementById('chatMessages');
-        container.innerHTML = msgs.length === 0 ? '<div style="text-align:center;padding:30px;color:var(--text-lighter);">Нет сообщений</div>' :
-            msgs.map(m => `<div class="msg-item ${currentUser&&m.userId===currentUser.uid?'msg-self':''}">
-                <div class="msg-avatar">${renderAvatar(m.username||'User','32px')}</div>
-                <div class="msg-content"><div class="msg-name">${escHtml(m.username||'User')} · ${formatTime(m.timestamp)}</div><div class="msg-text">${escHtml(m.text||'')}</div></div>
-            </div>`).join('');
-        container.scrollTop = container.scrollHeight;
-    }
-    
-    async function sendChatMessage() {
-        if (!navigator.onLine) {
-            showToast('Чат доступен только онлайн', 'error');
-            return;
-        }
-        const text = document.getElementById('chatInput').value.trim();
-        if (!text || !currentUser) return;
-        await db.collection('chat').add({userId:currentUser.uid,username:getUserName(),text,timestamp:Date.now()});
-        document.getElementById('chatInput').value = '';
-    }
-    
-    function initPm() {
-        if (!currentUser) {
-            document.getElementById('pmLoginPrompt').style.display = 'block';
-            document.getElementById('pmContainer').style.display = 'none';
-        } else {
-            document.getElementById('pmLoginPrompt').style.display = 'none';
-            document.getElementById('pmContainer').style.display = 'flex';
-            if (navigator.onLine) loadPmDialogs();
-            else document.getElementById('pmDialogs').innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-lighter);">Сообщения доступны только онлайн</p>';
-        }
-    }
-    
-    async function loadPmDialogs() {
-        if (!currentUser || !navigator.onLine) return;
-        const snap = await db.collection('users').get();
-        const users = snap.docs.filter(d => d.id !== currentUser.uid).map(d => ({id:d.id,...d.data()}));
-        const search = (document.getElementById('pmSearchInput')?.value||'').toLowerCase();
-        const filtered = users.filter(u => (u.username||'').toLowerCase().includes(search));
-        document.getElementById('pmDialogs').innerHTML = filtered.length === 0 ? '<p style="text-align:center;padding:20px;color:var(--text-lighter);">Нет пользователей</p>' :
-            filtered.map(u => `<div class="pm-dialog-item ${currentPmUser===u.id?'active':''}" onclick="openPmChat('${u.id}')">
-                <div style="width:38px;height:38px;">${renderAvatar(u.username||'User','38px')}</div>
-                <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.85rem;">${escHtml(u.username||'User')}</div></div>
-            </div>`).join('');
-    }
-    
-    async function openPmChat(otherId) {
-        if (!navigator.onLine) {
-            showToast('Личные сообщения доступны только онлайн', 'error');
-            return;
-        }
-        currentPmUser = otherId;
-        if (window.innerWidth < 769) document.getElementById('pmSidebar').style.display = 'none';
-        document.getElementById('pmChatArea').style.display = 'flex';
-        const userDoc = await db.collection('users').doc(otherId).get();
-        const other = userDoc.exists ? userDoc.data() : {username:'User'};
-        const convId = [currentUser.uid, otherId].sort().join('_');
-        const convRef = db.collection('privateMessages').doc(convId);
-        convRef.onSnapshot(doc => renderPmChat(other, doc.exists ? (doc.data().messages||[]) : [], convId));
-        if (!(await convRef.get()).exists) await convRef.set({participants:[currentUser.uid,otherId],messages:[],lastUpdated:Date.now()});
-    }
-    
-    function renderPmChat(other, messages, convId) {
-        document.getElementById('pmChatArea').innerHTML = `
-            <div class="pm-chat-header">
-                <button class="pm-back-btn" onclick="backToPmList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
-                <div style="width:32px;height:32px;">${renderAvatar(other.username||'User','32px')}</div>
-                <div style="font-weight:600;">${escHtml(other.username||'User')}</div>
-            </div>
-            <div class="pm-chat-messages" id="pmMessages">${messages.map(m => `<div class="pm-msg ${m.senderId===currentUser.uid?'sent':''}"><div class="pm-msg-bubble">${escHtml(m.text)}</div></div>`).join('')||'<div style="text-align:center;padding:20px;color:var(--text-lighter);">Нет сообщений</div>'}</div>
-            <div class="pm-chat-input-area">
-                <input type="text" class="chat-input" id="pmInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendPmMessage('${convId}')">
-                <button class="chat-send" onclick="sendPmMessage('${convId}')">Отпр.</button>
-            </div>`;
-        setTimeout(() => { const m = document.getElementById('pmMessages'); if(m) m.scrollTop = m.scrollHeight; }, 100);
-    }
-    
-    async function sendPmMessage(convId) {
-        if (!navigator.onLine) {
-            showToast('Сообщения доступны только онлайн', 'error');
-            return;
-        }
-        const text = document.getElementById('pmInput').value.trim();
-        if (!text || !currentUser) return;
-        const ref = db.collection('privateMessages').doc(convId);
-        const doc = await ref.get();
-        const msgs = doc.exists ? (doc.data().messages||[]) : [];
-        msgs.push({senderId:currentUser.uid,senderName:getUserName(),text,timestamp:Date.now()});
-        await ref.set({participants:[currentUser.uid,currentPmUser],messages:msgs,lastUpdated:Date.now(),lastMessage:text});
-        document.getElementById('pmInput').value = '';
-    }
-    
-    function backToPmList() {
-        document.getElementById('pmSidebar').style.display = 'flex';
-        document.getElementById('pmChatArea').style.display = 'none';
-        currentPmUser = null;
-    }
-    
-    // ===== AUTH =====
-    function openAuthModal() { document.getElementById('authModal').classList.add('active'); document.body.style.overflow = 'hidden'; switchAuthTab('login'); }
-    function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); document.body.style.overflow = ''; }
-    document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeAuthModal(); });
-    
-    function switchAuthTab(tab) {
-        const lf = document.getElementById('loginForm'), rf = document.getElementById('registerForm');
-        const lt = document.getElementById('loginTabBtn'), rt = document.getElementById('registerTabBtn');
-        
-        if (tab === 'login') {
-            lf.style.display = 'block';
-            rf.style.display = 'none';
-            lt.classList.add('active');
-            rt.classList.remove('active');
-        } else {
-            lf.style.display = 'none';
-            rf.style.display = 'block';
-            rt.classList.add('active');
-            lt.classList.remove('active');
-        }
-    }
-    
-    async function login() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        if (!email || !password) { showToast('Введите данные','error'); return; }
-        try { await auth.signInWithEmailAndPassword(email, password); closeAuthModal(); showToast('Добро пожаловать!','success'); }
-        catch(e) { showToast('Ошибка: '+e.message,'error'); }
-    }
-    
-    async function register() {
-        const username = document.getElementById('regUsername').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const password = document.getElementById('regPassword').value;
-        if (!username || !email || !password) { showToast('Заполните все поля','error'); return; }
-        if (password.length < 6) { showToast('Пароль минимум 6 символов','error'); return; }
-        try {
-            const cred = await auth.createUserWithEmailAndPassword(email, password);
-            await cred.user.updateProfile({displayName: username});
-            await db.collection('users').doc(cred.user.uid).set({username, email, createdAt: Date.now()});
-            closeAuthModal();
-            showToast('Регистрация успешна!','success');
-        } catch(e) { showToast('Ошибка: '+e.message,'error'); }
-    }
-    
-    function updateUI(user) {
-        currentUser = user;
-        isAdmin = user ? ADMIN_EMAILS.includes(user.email) : false;
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
-        
-        const headerRight = document.getElementById('headerRight');
-        if (user) {
-            const name = getUserName();
-            headerRight.innerHTML = `
-                <div class="user-badge" onclick="toggleDropdown()">
-                    <div class="user-avatar">${renderAvatar(name,'34px',getUserPhoto())}</div>
-                    <span class="user-name">${escHtml(name)}${isAdmin?' 👑':''}</span>
-                </div>
-                <div class="user-dropdown" id="userDropdown">
-                    <button class="dropdown-item" onclick="openProfileModal()">👤 Профиль</button>
-                    <button class="dropdown-item" onclick="switchPage('songs')">🎵 Песни</button>
-                    <button class="dropdown-item" onclick="switchPage('chat')">💬 Чат</button>
-                    <button class="dropdown-item" onclick="switchPage('pm')">📩 Сообщения</button>
-                    ${isAdmin?'<button class="dropdown-item" onclick="switchPage(\'admin\')">👑 Админ</button>':''}
-                    <button class="dropdown-item danger" onclick="logout()">🚪 Выйти</button>
-                </div>`;
-        } else {
-            headerRight.innerHTML = '<button class="auth-btn" onclick="openAuthModal()">Войти</button>';
-        }
-        db.collection('users').get().then(s => document.getElementById('statUsers').textContent = s.size).catch(() => {});
-    }
-    
-    function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('show'); }
-    
-    function logout() {
-        auth.signOut();
-        currentUser = null; isAdmin = false; currentPmUser = null;
-        switchPage('songs');
-        showToast('Вы вышли','info');
-    }
-    
-    // ===== INIT =====
-    auth.onAuthStateChanged(user => {
-        updateUI(user);
-        if (document.getElementById('page-songs').classList.contains('active')) renderSongs();
-    });
-    
-    window.addEventListener('load', () => {
-        setTimeout(() => document.getElementById('loader').classList.add('loaded'), 2000);
-        loadCategories();
-        loadSongs();
-        // Initial offline status check
-        if (!navigator.onLine) {
-            showOfflineIndicator('offline', 'Нет соединения с интернетом. Песни доступны из кеша.', true);
-        }
-        
-        // Register Service Worker for caching
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
-        }
-    });
-    
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 769 && document.getElementById('page-pm').classList.contains('active')) {
-            document.getElementById('pmSidebar').style.display = 'flex';
-        }
-    });
-</script>
 
-<!-- Service Worker -->
-<script>
-    // Create service worker file dynamically
-    if ('serviceWorker' in navigator) {
-        const swCode = `const CACHE_NAME = 'songbook-v1';
-const urlsToCache = [
-  '/',
-  '/index.html'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
-});`;
-        
-        // Only create if not exists
-        fetch('/sw.js').catch(() => {
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            const url = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(url);
-        });
+    function base64ToBuf(b64) {
+      return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
     }
-</script>
-</body>
-</html>
+
+    async function deriveKey(masterPassword, saltUint8) {
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(masterPassword),
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: saltUint8,
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    async function encryptSecret(plainText, masterPassword) {
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveKey(masterPassword, salt);
+      const encryptedBuf = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        key,
+        enc.encode(plainText)
+      );
+      return {
+        ciphertext: bufToBase64(encryptedBuf),
+        iv: bufToBase64(iv),
+        salt: bufToBase64(salt),
+        alg: "AES-256-GCM"
+      };
+    }
+
+    async function decryptSecret(cipherPayload, masterPassword) {
+      const salt = base64ToBuf(cipherPayload.salt);
+      const iv = base64ToBuf(cipherPayload.iv);
+      const data = base64ToBuf(cipherPayload.ciphertext);
+      const key = await deriveKey(masterPassword, salt);
+      const decryptedBuf = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv },
+        key,
+        data
+      );
+      return dec.decode(decryptedBuf);
+    }
+
+    // ==========================================
+    // РАЗБЛОКИРОВКА И СИНХРОНИЗАЦИЯ С FIRESTORE
+    // ==========================================
+    window.unlockVault = async function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('masterPassInput').value;
+      const errEl = document.getElementById('lockError');
+      const btn = document.getElementById('unlockBtn');
+
+      errEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Проверка ключа и загрузка Firestore...';
+
+      try {
+        // Первичное чтение коллекции из Firestore
+        const snap = await getDocs(collection(db, COLLECTION_NAME));
+        const docs = [];
+        snap.forEach(d => docs.push(d.data()));
+
+        // Если база в Firebase совсем пустая — создаём 3 стартовые записи, зашифрованные введённым паролем
+        if (docs.length === 0) {
+          const today = new Date();
+          const daysAgo = (d) => new Date(today.getTime() - d * 86400000).toISOString().split('T')[0];
+          const demo = [
+            { id: '1', name: 'GitHub', login: 'nikita_qa', pass: 'Gh!92_kLp#10xZv', updatedAt: daysAgo(15), cycle: 90 },
+            { id: '2', name: 'Почта Mail', login: 'nikita@example.ru', pass: 'MySecretMail_99!', updatedAt: daysAgo(82), cycle: 90 },
+            { id: '3', name: 'Тестовый стенд Stage', login: 'qa_admin', pass: 'Stage_991!aBc', updatedAt: daysAgo(45), cycle: 30 }
+          ];
+          for (const item of demo) {
+            const cipherPayload = await encryptSecret(item.pass, pass);
+            const docData = {
+              id: item.id,
+              name: item.name,
+              login: item.login,
+              updatedAt: item.updatedAt,
+              cycle: item.cycle,
+              cipherPayload
+            };
+            await setDoc(doc(db, COLLECTION_NAME, item.id), docData);
+            docs.push(docData);
+          }
+        }
+
+        // Пробуем расшифровать существующие документы введённым мастер-паролем
+        rawEntries = docs;
+        currentMasterPassword = pass;
+        const ok = await decryptAllEntries();
+
+        if (!ok) {
+          currentMasterPassword = null;
+          errEl.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> Разблокировать и синхронизировать';
+          return;
+        }
+
+        // Подписываемся на изменения коллекции в реальном времени
+        startRealtimeListener();
+
+        document.getElementById('lockScreen').classList.add('hidden');
+        document.getElementById('masterPassInput').value = '';
+        showToast("База secuvault-db успешно расшифрована!");
+      } catch (err) {
+        console.error("Ошибка Firestore:", err);
+        document.getElementById('firestoreErrorBanner').classList.remove('hidden');
+        alert("Ошибка подключения к Firestore: " + err.message + "\nПроверьте, что база Firestore создана в консоли и в вкладке Rules разрешена запись.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> Разблокировать и синхронизировать';
+      }
+    };
+
+    function startRealtimeListener() {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      unsubscribeSnapshot = onSnapshot(collection(db, COLLECTION_NAME), async (snapshot) => {
+        document.getElementById('firestoreErrorBanner').classList.add('hidden');
+        rawEntries = [];
+        snapshot.forEach((docSnap) => rawEntries.push(docSnap.data()));
+        if (currentMasterPassword) {
+          await decryptAllEntries();
+        }
+      }, (error) => {
+        console.error("Ошибка подписки Firestore:", error);
+        document.getElementById('firestoreErrorBanner').classList.remove('hidden');
+      });
+    }
+
+    async function decryptAllEntries() {
+      if (!currentMasterPassword) return false;
+      const temp = [];
+      for (const item of rawEntries) {
+        try {
+          if (item.cipherPayload) {
+            const plainPass = await decryptSecret(item.cipherPayload, currentMasterPassword
